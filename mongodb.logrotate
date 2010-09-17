@@ -1,0 +1,11 @@
+/var/log/mongo/*.log {
+  weekly
+  rotate 10
+  copytruncate
+  delaycompress
+  compress
+  notifempty
+  missingok
+}
+
+
