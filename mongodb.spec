@@ -30,17 +30,6 @@ and auto-sharding.
 This package provides the mongo shell, import/export tools, and other
 client utilities.
 
-%package server
-Summary:	MongoDB server, sharding server, and support scripts
-Group:		Applications/Databases
-Requires:	%{name} = %{version}-%{release}
-
-%description server
-Mongo (from "huMONGOus") is a schema-free document-oriented database.
-
-This package provides the mongo server software, mongo sharding server
-softwware, default configuration files, and init.d scripts.
-
 %package devel
 Summary:	Headers and libraries for mongo development
 Group:		Development/Libraries
@@ -51,6 +40,17 @@ Mongo (from "huMONGOus") is a schema-free document-oriented database.
 
 This package provides the mongo static library and header files needed
 to develop mongo client software.
+
+%package server
+Summary:	MongoDB server, sharding server, and support scripts
+Group:		Applications/Databases
+Requires:	%{name} = %{version}-%{release}
+
+%description server
+Mongo (from "huMONGOus") is a schema-free document-oriented database.
+
+This package provides the mongo server software, mongo sharding server
+softwware, default configuration files, and init.d scripts.
 
 %prep
 %setup -q -n %{name}-src-r%{version}
@@ -70,32 +70,24 @@ find -type f -executable | xargs chmod a-x
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
-	$RPM_BUILD_ROOT/etc/{logrotate.d,rc.d/init.d} \
+	$RPM_BUILD_ROOT/etc/{logrotate.d,rc.d/init.d,sysconfig} \
 	$RPM_BUILD_ROOT%{_var}/{lib,log}/mongo
+
 %scons install \
 	--prefix=$RPM_BUILD_ROOT%{_prefix} \
 	--sharedclient \
 	--full \
 	--usev8
 
-cp -a debian/*.1 $RPM_BUILD_ROOT%{_mandir}/man1
-#install -d $RPM_BUILD_ROOT%{_sysconfdir}/init.d
-#cp rpm/init.d-mongod $RPM_BUILD_ROOT%{_sysconfdir}/init.d/mongod
-#chmod a+x $RPM_BUILD_ROOT%{_sysconfdir}/init.d/mongod
+install -p %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/mongod
+cp -a rpm/mongod.sysconfig $RPM_BUILD_ROOT/etc/sysconfig/mongod
 
+cp -a %{SOURCE1} $RPM_BUILD_ROOT/etc/logrotate.d/mongod
 cp -a rpm/mongod.conf $RPM_BUILD_ROOT%{_sysconfdir}/mongod.conf
-#install -d $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
-#cp rpm/mongod.sysconfig $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/mongod
-#cp rpm/mongod.sysconfig $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/mongod
+
+cp -a debian/*.1 $RPM_BUILD_ROOT%{_mandir}/man1
 
 touch $RPM_BUILD_ROOT%{_var}/log/mongo/mongod.log
-cp -a %{SOURCE1} $RPM_BUILD_ROOT/etc/logrotate.d/mongod
-install -p %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/mongod
-
-#install -d $RPM_BUILD_ROOT%{_sbindir}
-#ln -s %{_sysconfdir}/init.d/mongod $RPM_BUILD_ROOT%{_sbindir}/rcmongod
-# XXX PFF?
-ln -s ../../etc/rc.d/init.d/mongod $RPM_BUILD_ROOT%{_sbindir}/rcmongod
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -136,11 +128,11 @@ useradd -r -g mongod -d %{_var}/lib/mongo -s /sbin/nologin -c "user for MongoDB 
 
 %files server
 %defattr(644,root,root,755)
-%config(noreplace) %{_sysconfdir}/mongod.conf
+%dir %{_sysconfdir}
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/mongod.conf
+%attr(754,root,root) /etc/rc.d/init.d/mongod
+%config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/mongod
 %config(noreplace) /etc/logrotate.d/mongod
-%attr(754,root,root) %config /etc/rc.d/init.d/mongod
-%attr(755,root,root) %{_sbindir}/rcmongod
-%config %{_var}/adm/fillup-templates/sysconfig.mongod
 %attr(755,root,root) %{_bindir}/mongod
 %attr(755,root,root) %{_bindir}/mongos
 %{_mandir}/man1/mongos.1*
