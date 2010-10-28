@@ -17,6 +17,7 @@ BuildRequires:	libstdc++-devel >= 6:4.0
 BuildRequires:	pcre-cxx-devel
 BuildRequires:	pcre-devel
 BuildRequires:	readline-devel
+BuildRequires:	rpmbuild(macros) >= 1.228
 BuildRequires:	scons >= 1.2
 BuildRequires:	v8-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -45,6 +46,8 @@ to develop mongo client software.
 Summary:	MongoDB server, sharding server, and support scripts
 Group:		Applications/Databases
 Requires:	%{name} = %{version}-%{release}
+Requires(post,preun):	/sbin/chkconfig
+Requires:	rc-scripts
 
 %description server
 Mongo (from "huMONGOus") is a schema-free document-oriented database.
@@ -97,13 +100,14 @@ groupadd -r mongod 2>/dev/null || :
 useradd -r -g mongod -d %{_var}/lib/mongo -s /sbin/nologin -c "user for MongoDB Database Server" mongod 2>/dev/null || :
 
 %post server
-#%fillup_and_insserv -n mongod mongod
-#%restart_on_update mongod
+/sbin/chkconfig --add mongod
+%service mongod restart
 
 %preun server
-#%stop_on_removal mongod
-
-%postun server
+if [ "$1" = "0" ]; then
+	%service -q mongod stop
+	/sbin/chkconfig --del mongod
+fi
 
 %files
 %defattr(644,root,root,755)
