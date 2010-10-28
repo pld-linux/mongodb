@@ -1,17 +1,19 @@
+# TODO
+# - pld useradd/groupadd (register uid/gid)
 Summary:	MongoDB client shell and tools
 Name:		mongodb
 Version:	1.6.2
-Release:	0
+Release:	0.1
 License:	AGPL 3.0
 Group:		Applications/Databases
-URL:		http://www.mongodb.org
+URL:		http://www.mongodb.org/
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
 # Source0-md5:	358bfc52855a66d3c954e7f6f51bcd12
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
 # BuildRequires:  libpcap-devel
 BuildRequires:	boost-devel >= 1.42
-BuildRequires:	gcc >= 4.0
+BuildRequires:	gcc >= 6:4.0
 BuildRequires:	libstdc++-devel
 BuildRequires:	libstdc++-devel >= 4.0
 BuildRequires:	pcre-cxx-devel
@@ -58,43 +60,49 @@ to develop mongo client software.
 %prep
 %setup -q -n %{name}-src-r%{version}
 
-%build
-# Fix permission
-find %{_builddir}/%{name}-src-r%{version} -type f -executable -exec chmod a-x '{}' \;
+# Fix permissions
+find -type f -executable | xargs chmod a-x
 
-%scons -j 3 --prefix=$RPM_BUILD_ROOT%{_prefix} --sharedclient --full all --usev8
+%build
+%scons \
+	--prefix=$RPM_BUILD_ROOT%{_prefix} \
+	--sharedclient \
+	--full all \
+	--usev8
+
 # XXX really should have shared library here
 
 %install
 rm -rf $RPM_BUILD_ROOT
-scons --prefix=$RPM_BUILD_ROOT%{_usr} --sharedclient --full --usev8 install
+install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
+	$RPM_BUILD_ROOT/etc/{logrotate.d,rc.d/init.d} \
+	$RPM_BUILD_ROOT%{_var}/{lib,log}/mongo
+%scons install \
+	--prefix=$RPM_BUILD_ROOT%{_prefix} \
+	--sharedclient \
+	--full \
+	--usev8
 
-install -d $RPM_BUILD_ROOT%{_mandir}/man1
-cp debian/*.1 $RPM_BUILD_ROOT%{_mandir}/man1/
+cp -a debian/*.1 $RPM_BUILD_ROOT%{_mandir}/man1
 #install -d $RPM_BUILD_ROOT%{_sysconfdir}/init.d
 #cp rpm/init.d-mongod $RPM_BUILD_ROOT%{_sysconfdir}/init.d/mongod
 #chmod a+x $RPM_BUILD_ROOT%{_sysconfdir}/init.d/mongod
 
-install -d $RPM_BUILD_ROOT%{_sysconfdir}
-cp rpm/mongod.conf $RPM_BUILD_ROOT%{_sysconfdir}/mongod.conf
+cp -a rpm/mongod.conf $RPM_BUILD_ROOT%{_sysconfdir}/mongod.conf
 #install -d $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
 #cp rpm/mongod.sysconfig $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/mongod
 #cp rpm/mongod.sysconfig $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/mongod
 
-install -d $RPM_BUILD_ROOT%{_var}/lib/mongo
-install -d $RPM_BUILD_ROOT%{_var}/log/mongo
 touch $RPM_BUILD_ROOT%{_var}/log/mongo/mongod.log
-# install logrotate
-install -D %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/mongod
-# install init script
-install -D %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/init.d/mongod
+cp -a %{SOURCE1} $RPM_BUILD_ROOT/etc/logrotate.d/mongod
+install -p %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/mongod
 
 #install -d $RPM_BUILD_ROOT%{_sbindir}
 #ln -s %{_sysconfdir}/init.d/mongod $RPM_BUILD_ROOT%{_sbindir}/rcmongod
-ln -s ../..%{_sysconfdir}/init.d/mongod $RPM_BUILD_ROOT%{_sbindir}/rcmongod
+# XXX PFF?
+ln -s ../../etc/rc.d/init.d/mongod $RPM_BUILD_ROOT%{_sbindir}/rcmongod
 
 %clean
-scons -c --usev8
 rm -rf $RPM_BUILD_ROOT
 
 %pre server
@@ -110,9 +118,8 @@ useradd -r -g mongod -d %{_var}/lib/mongo -s /sbin/nologin -c "user for MongoDB 
 
 %postun server
 
-%post devel -p /sbin/ldconfig
-
-%postun devel -p /sbin/ldconfig
+%post	devel -p /sbin/ldconfig
+%postun	devel -p /sbin/ldconfig
 
 %files
 %defattr(644,root,root,755)
