@@ -15,7 +15,7 @@ BuildRequires:	gcc >= 4.0
 BuildRequires:	libstdc++-devel
 BuildRequires:	libstdc++-devel >= 4.0
 BuildRequires:	pcre-cxx-devel
-#BuildRequires:	pcre-devel
+BuildRequires:	pcre-devel
 BuildRequires:	readline-devel
 BuildRequires:	scons >= 1.2
 BuildRequires:	v8-devel
