@@ -46,7 +46,15 @@ to develop mongo client software.
 Summary:	MongoDB server, sharding server, and support scripts
 Group:		Applications/Databases
 Requires:	%{name} = %{version}-%{release}
+Provides:	group(mongod)
+Provides:	user(mongod)
 Requires(post,preun):	/sbin/chkconfig
+Requires(postun):	/usr/sbin/groupdel
+Requires(postun):	/usr/sbin/userdel
+Requires(pre):	/bin/id
+Requires(pre):	/usr/bin/getgid
+Requires(pre):	/usr/sbin/groupadd
+Requires(pre):	/usr/sbin/useradd
 Requires:	rc-scripts
 
 %description server
@@ -96,8 +104,8 @@ touch $RPM_BUILD_ROOT%{_var}/log/mongo/mongod.log
 rm -rf $RPM_BUILD_ROOT
 
 %pre server
-groupadd -r mongod 2>/dev/null || :
-useradd -r -g mongod -d %{_var}/lib/mongo -s /sbin/nologin -c "user for MongoDB Database Server" mongod 2>/dev/null || :
+%groupadd -g xxx -r mongod
+%useradd -u xxx -r -g mongod -d %{_var}/lib/mongo -s /bin/false -c "MongoDB Database Server" mongod
 
 %post server
 /sbin/chkconfig --add mongod
@@ -107,6 +115,12 @@ useradd -r -g mongod -d %{_var}/lib/mongo -s /sbin/nologin -c "user for MongoDB 
 if [ "$1" = "0" ]; then
 	%service -q mongod stop
 	/sbin/chkconfig --del mongod
+fi
+
+%postun
+if [ "$1" = "0" ]; then
+	%userremove mongod
+	%groupremove mongod
 fi
 
 %files
