@@ -5,16 +5,17 @@ Release:	0
 License:	AGPL 3.0
 Group:		Applications/Databases
 URL:		http://www.mongodb.org
-Source0: http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
-#Source0:	%{name}-src-r%{version}.tar.gz
-Source1:	mongod.logrotate
-Source2:	mongod.init
+Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
+# Source0-md5:	358bfc52855a66d3c954e7f6f51bcd12
+Source1:	%{name}.logrotate
+Source2:	%{name}.init
 # BuildRequires:  libpcap-devel
 BuildRequires:	boost-devel >= 1.42
 BuildRequires:	gcc >= 4.0
 BuildRequires:	libstdc++-devel
 BuildRequires:	libstdc++-devel >= 4.0
-BuildRequires:	pcre-devel
+BuildRequires:	pcre-cxx-devel
+#BuildRequires:	pcre-devel
 BuildRequires:	readline-devel
 BuildRequires:	scons >= 1.2
 BuildRequires:	v8-devel
@@ -44,7 +45,7 @@ This package provides the mongo server software, mongo sharding server
 softwware, default configuration files, and init.d scripts.
 
 %package devel
-Summary:	Headers and libraries for mongo development.
+Summary:	Headers and libraries for mongo development
 Group:		Development/Libraries
 Requires:	%{name} = %{version}
 
@@ -61,7 +62,7 @@ to develop mongo client software.
 # Fix permission
 find %{_builddir}/%{name}-src-r%{version} -type f -executable -exec chmod a-x '{}' \;
 
-scons -j 3 --prefix=$RPM_BUILD_ROOT%{_prefix} --sharedclient --full all --usev8
+%scons -j 3 --prefix=$RPM_BUILD_ROOT%{_prefix} --sharedclient --full all --usev8
 # XXX really should have shared library here
 
 %install
