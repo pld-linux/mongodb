@@ -13,17 +13,13 @@ Source1:	%{name}.logrotate
 Source2:	%{name}.init
 # BuildRequires:  libpcap-devel
 BuildRequires:	boost-devel >= 1.42
-BuildRequires:	gcc >= 6:4.0
-BuildRequires:	libstdc++-devel
-BuildRequires:	libstdc++-devel >= 4.0
+BuildRequires:	libstdc++-devel >= 6:4.0
 BuildRequires:	pcre-cxx-devel
 BuildRequires:	pcre-devel
 BuildRequires:	readline-devel
 BuildRequires:	scons >= 1.2
 BuildRequires:	v8-devel
-Requires:	libstdc++
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
-Requires(pre):	pwdutils
 
 %description
 Mongo (from "huMONGOus") is a schema-free document-oriented database.
@@ -37,8 +33,7 @@ client utilities.
 %package server
 Summary:	MongoDB server, sharding server, and support scripts
 Group:		Applications/Databases
-Requires:	%{name} = %{version}
-Requires:	logrotate
+Requires:	%{name} = %{version}-%{release}
 
 %description server
 Mongo (from "huMONGOus") is a schema-free document-oriented database.
@@ -49,7 +44,7 @@ softwware, default configuration files, and init.d scripts.
 %package devel
 Summary:	Headers and libraries for mongo development
 Group:		Development/Libraries
-Requires:	%{name} = %{version}
+Requires:	%{name} = %{version}-%{release}
 
 %description devel
 Mongo (from "huMONGOus") is a schema-free document-oriented database.
@@ -117,9 +112,6 @@ useradd -r -g mongod -d %{_var}/lib/mongo -s /sbin/nologin -c "user for MongoDB 
 #%stop_on_removal mongod
 
 %postun server
-
-%post	devel -p /sbin/ldconfig
-%postun	devel -p /sbin/ldconfig
 
 %files
 %defattr(644,root,root,755)
