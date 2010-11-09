@@ -2,13 +2,13 @@
 # - pld useradd/groupadd (register uid/gid)
 Summary:	MongoDB client shell and tools
 Name:		mongodb
-Version:	1.6.2
+Version:	1.6.3
 Release:	0.1
 License:	AGPL 3.0
 Group:		Applications/Databases
 URL:		http://www.mongodb.org/
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
-# Source0-md5:	358bfc52855a66d3c954e7f6f51bcd12
+# Source0-md5:	076b91f37ee434db80441e9028fe50a5
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
 # BuildRequires:  libpcap-devel
