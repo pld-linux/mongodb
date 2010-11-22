@@ -1,14 +1,16 @@
+#
 # TODO
-# - pld useradd/groupadd (register uid/gid)
+# - pass our rpm*cflags, use CXX
+#
 Summary:	MongoDB client shell and tools
 Name:		mongodb
-Version:	1.6.3
+Version:	1.6.4
 Release:	0.1
 License:	AGPL 3.0
 Group:		Applications/Databases
 URL:		http://www.mongodb.org/
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
-# Source0-md5:	076b91f37ee434db80441e9028fe50a5
+# Source0-md5:	4df15dba13d7e743f0148127122baec6
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
 # BuildRequires:  libpcap-devel
@@ -104,8 +106,8 @@ touch $RPM_BUILD_ROOT%{_var}/log/mongo/mongod.log
 rm -rf $RPM_BUILD_ROOT
 
 %pre server
-%groupadd -g xxx -r mongod
-%useradd -u xxx -r -g mongod -d %{_var}/lib/mongo -s /bin/false -c "MongoDB Database Server" mongod
+%groupadd -g 258 -r mongod
+%useradd -u 258 -r -g mongod -d %{_var}/lib/mongo -s /bin/false -c "MongoDB Database Server" mongod
 
 %post server
 /sbin/chkconfig --add mongod
@@ -117,7 +119,7 @@ if [ "$1" = "0" ]; then
 	/sbin/chkconfig --del mongod
 fi
 
-%postun
+%postun server
 if [ "$1" = "0" ]; then
 	%userremove mongod
 	%groupremove mongod
