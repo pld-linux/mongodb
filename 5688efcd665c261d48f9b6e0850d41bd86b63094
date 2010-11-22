@@ -1,0 +1,4 @@
+- up to 1.6.4
+- registered uid and gid
+- postun should be for server package not main
+- new TODO
