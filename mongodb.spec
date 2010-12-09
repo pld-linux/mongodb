@@ -1,16 +1,16 @@
 #
 # TODO
-# - pass our rpm*cflags, use CXX
+# - pass our rpm*cflags
 #
 Summary:	MongoDB client shell and tools
 Name:		mongodb
-Version:	1.6.4
+Version:	1.6.5
 Release:	0.1
 License:	AGPL 3.0
 Group:		Applications/Databases
 URL:		http://www.mongodb.org/
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
-# Source0-md5:	4df15dba13d7e743f0148127122baec6
+# Source0-md5:	99f1c4c256be1611da6068aea30f9a30
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
 # BuildRequires:  libpcap-devel
@@ -21,6 +21,7 @@ BuildRequires:	pcre-devel
 BuildRequires:	readline-devel
 BuildRequires:	rpmbuild(macros) >= 1.228
 BuildRequires:	scons >= 1.2
+BuildRequires:	sed >= 4.0
 BuildRequires:	v8-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -67,6 +68,7 @@ softwware, default configuration files, and init.d scripts.
 
 %prep
 %setup -q -n %{name}-src-r%{version}
+%{__sed} -i 's,-O3,,' SConstruct
 
 # Fix permissions
 find -type f -executable | xargs chmod a-x
@@ -76,7 +78,8 @@ find -type f -executable | xargs chmod a-x
 	--prefix=$RPM_BUILD_ROOT%{_prefix} \
 	--sharedclient \
 	--full all \
-	--usev8
+	--usev8 \
+	--cxx=%{__cxx}
 
 # XXX really should have shared library here
 
@@ -134,6 +137,7 @@ fi
 %attr(755,root,root) %{_bindir}/mongofiles
 %attr(755,root,root) %{_bindir}/mongoimport
 %attr(755,root,root) %{_bindir}/mongorestore
+%attr(755,root,root) %{_bindir}/mongosniff
 %attr(755,root,root) %{_bindir}/mongostat
 %attr(755,root,root) %{_bindir}/bsondump
 %{_mandir}/man1/mongo.1*
