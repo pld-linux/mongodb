@@ -4,15 +4,16 @@
 #
 Summary:	MongoDB client shell and tools
 Name:		mongodb
-Version:	1.6.5
+Version:	1.8.3
 Release:	0.1
 License:	AGPL 3.0
 Group:		Applications/Databases
 URL:		http://www.mongodb.org/
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
-# Source0-md5:	99f1c4c256be1611da6068aea30f9a30
+# Source0-md5:	662e7ad6ff9f8e4d16c72c038b4a0c60
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
+Patch0:		config.patch
 # BuildRequires:  libpcap-devel
 BuildRequires:	boost-devel >= 1.42
 BuildRequires:	libstdc++-devel >= 6:4.0
@@ -68,6 +69,7 @@ softwware, default configuration files, and init.d scripts.
 
 %prep
 %setup -q -n %{name}-src-r%{version}
+%patch0 -p1
 %{__sed} -i 's,-O3,,' SConstruct
 
 # Fix permissions
@@ -137,7 +139,7 @@ fi
 %attr(755,root,root) %{_bindir}/mongofiles
 %attr(755,root,root) %{_bindir}/mongoimport
 %attr(755,root,root) %{_bindir}/mongorestore
-%attr(755,root,root) %{_bindir}/mongosniff
+#%%attr(755,root,root) %{_bindir}/mongosniff
 %attr(755,root,root) %{_bindir}/mongostat
 %attr(755,root,root) %{_bindir}/bsondump
 %{_mandir}/man1/mongo.1*

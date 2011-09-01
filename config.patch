@@ -1,0 +1,20 @@
+--- mongodb-src-r1.8.3/SConstruct~	2011-09-01 19:06:02.082655213 +0200
++++ mongodb-src-r1.8.3/SConstruct	2011-09-01 19:07:59.250802930 +0200
+@@ -671,7 +671,6 @@
+     env.Append( CPPFLAGS="-fPIC -fno-strict-aliasing -ggdb -pthread -Wall -Wsign-compare -Wno-unknown-pragmas -Winvalid-pch" )
+     # env.Append( " -Wconversion" ) TODO: this doesn't really work yet
+     if linux:
+-        env.Append( CPPFLAGS=" -Werror " )
+         env.Append( CPPFLAGS=" -fno-builtin-memcmp " ) # glibc's memcmp is faster than gcc's
+     env.Append( CXXFLAGS=" -Wnon-virtual-dtor " )
+     env.Append( LINKFLAGS=" -fPIC -pthread -rdynamic" )
+@@ -679,7 +678,8 @@
+ 
+     #make scons colorgcc friendly
+     env['ENV']['HOME'] = os.environ['HOME']
+-    env['ENV']['TERM'] = os.environ['TERM']
++    if 'TERM' in os.environ:
++        env['ENV']['TERM'] = os.environ['TERM']
+ 
+     if linux and has_option( "sharedclient" ):
+         env.Append( LINKFLAGS=" -Wl,--as-needed -Wl,-zdefs " )
