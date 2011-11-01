@@ -3,19 +3,20 @@
 # - pass our rpm*cflags
 #
 Summary:	MongoDB client shell and tools
+Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
 Name:		mongodb
 Version:	1.8.3
 Release:	0.1
 License:	AGPL 3.0
 Group:		Applications/Databases
-URL:		http://www.mongodb.org/
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
 # Source0-md5:	662e7ad6ff9f8e4d16c72c038b4a0c60
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
 Patch0:		config.patch
-# BuildRequires:  libpcap-devel
+URL:		http://www.mongodb.org/
 BuildRequires:	boost-devel >= 1.42
+#BuildRequires:	libpcap-devel
 BuildRequires:	libstdc++-devel >= 6:4.0
 BuildRequires:	pcre-cxx-devel
 BuildRequires:	pcre-devel
@@ -35,8 +36,18 @@ and auto-sharding.
 This package provides the mongo shell, import/export tools, and other
 client utilities.
 
+%description -l pl.UTF-8
+Mongo (od "huMONGOus") to baza danych zorientowana na dokumenty
+pozbawione schematu. Obsługuje dynamicznie profilowane zapytania,
+pełne indeksowanie, replikację i fail-over, wydajne składowanie dużych
+obiektów danych binarnych oraz automatyczne dzielenie.
+
+Ten pakiet zawiera powłokę mongo, narzędzia do eksportu/importu danych
+oraz inne narzędzia klienckie.
+
 %package devel
-Summary:	Headers and libraries for mongo development
+Summary:	Header files and libraries for MongoDB clients development
+Summary(pl.UTF-8):	Pliki nagłówkowe i biblioteki do programowania klientów MongoDB
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 
@@ -46,8 +57,16 @@ Mongo (from "huMONGOus") is a schema-free document-oriented database.
 This package provides the mongo static library and header files needed
 to develop mongo client software.
 
+%description devel -l pl.UTF-8
+Mongo (od "huMONGOus") to baza danych zorientowana na dokumenty
+pozbawione schematu.
+
+Ten pakiet zawiera bibliotekę statyczną mongo oraz pliki nagłówkowe
+potrzebne do tworzenia oprogramowania klienckiego dla MongoDB
+
 %package server
 Summary:	MongoDB server, sharding server, and support scripts
+Summary(pl.UTF-8):	Serwer MongoDB, serwer dzielący oraz skrypty pomocnicze
 Group:		Applications/Databases
 Requires:	%{name} = %{version}-%{release}
 Provides:	group(mongod)
@@ -65,12 +84,19 @@ Requires:	rc-scripts
 Mongo (from "huMONGOus") is a schema-free document-oriented database.
 
 This package provides the mongo server software, mongo sharding server
-softwware, default configuration files, and init.d scripts.
+software, default configuration files, and init.d scripts.
+
+%description server -l pl.UTF-8
+Mongo (od "huMONGOus") to baza danych zorientowana na dokumenty
+pozbawione schematu.
+
+Ten pakiet zawiera serwer mongo, serwer dzielący, pliki domyślnej
+konfiguracji oraz skrypty init.d.
 
 %prep
 %setup -q -n %{name}-src-r%{version}
 %patch0 -p1
-%{__sed} -i 's,-O3,,' SConstruct
+%{__sed} -i 's,-O3,%{rpmcxxflags},;/,\.\.\/v8/d' SConstruct
 
 # Fix permissions
 find -type f -executable | xargs chmod a-x
@@ -97,13 +123,11 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
 	--full \
 	--usev8
 
+cp -p %{SOURCE1} $RPM_BUILD_ROOT/etc/logrotate.d/mongod
 install -p %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/mongod
-cp -a rpm/mongod.sysconfig $RPM_BUILD_ROOT/etc/sysconfig/mongod
-
-cp -a %{SOURCE1} $RPM_BUILD_ROOT/etc/logrotate.d/mongod
-cp -a rpm/mongod.conf $RPM_BUILD_ROOT%{_sysconfdir}/mongod.conf
-
-cp -a debian/*.1 $RPM_BUILD_ROOT%{_mandir}/man1
+cp -p rpm/mongod.sysconfig $RPM_BUILD_ROOT/etc/sysconfig/mongod
+cp -p rpm/mongod.conf $RPM_BUILD_ROOT%{_sysconfdir}/mongod.conf
+cp -p debian/*.1 $RPM_BUILD_ROOT%{_mandir}/man1
 
 touch $RPM_BUILD_ROOT%{_var}/log/mongo/mongod.log
 
@@ -168,7 +192,7 @@ fi
 
 %files devel
 %defattr(644,root,root,755)
-%{_includedir}/mongo
+%attr(755,root,root) %{_libdir}/libmongoclient.so
 %{_libdir}/libmongoclient.a
-%{_libdir}/libmongoclient.so
 #%{_libdir}/libmongotestfiles.a
+%{_includedir}/mongo
