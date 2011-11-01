@@ -1,13 +1,13 @@
-# TODO: pass rpmldflags, rpmcppflags
+# TODO: pass rpmldflags
 Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
 Name:		mongodb
-Version:	1.8.3
-Release:	0.1
-License:	AGPL 3.0
+Version:	1.8.4
+Release:	1
+License:	AGPL v3
 Group:		Applications/Databases
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
-# Source0-md5:	662e7ad6ff9f8e4d16c72c038b4a0c60
+# Source0-md5:	65da0fe8a08917dafd11b069debbf810
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
 Patch0:		config.patch
@@ -126,7 +126,7 @@ konfiguracji oraz skrypty init.d.
 %prep
 %setup -q -n %{name}-src-r%{version}
 %patch0 -p1
-%{__sed} -i 's,-O3,%{rpmcxxflags},;/,\.\.\/v8/d' SConstruct
+%{__sed} -i 's,-O3,%{rpmcxxflags} %{rpmcppflags},;/,\.\.\/v8/d' SConstruct
 
 # Fix permissions
 find -type f -executable | xargs chmod a-x
@@ -139,19 +139,19 @@ find -type f -executable | xargs chmod a-x
 	--usev8 \
 	--cxx=%{__cxx}
 
-# XXX really should have shared library here
-
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
 	$RPM_BUILD_ROOT/etc/{logrotate.d,rc.d/init.d,sysconfig} \
 	$RPM_BUILD_ROOT%{_var}/{lib,log}/mongo
 
+# XXX: scons is so great, recompiles everything here!
 %scons install \
 	--prefix=$RPM_BUILD_ROOT%{_prefix} \
 	--sharedclient \
 	--full \
-	--usev8
+	--usev8 \
+	--cxx=%{__cxx}
 
 cp -p %{SOURCE1} $RPM_BUILD_ROOT/etc/logrotate.d/mongod
 install -p %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/mongod
