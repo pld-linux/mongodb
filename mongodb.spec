@@ -1,7 +1,4 @@
-#
-# TODO
-# - pass our rpm*cflags
-#
+# TODO: pass rpmldflags, rpmcppflags
 Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
 Name:		mongodb
@@ -16,7 +13,7 @@ Source2:	%{name}.init
 Patch0:		config.patch
 URL:		http://www.mongodb.org/
 BuildRequires:	boost-devel >= 1.42
-#BuildRequires:	libpcap-devel
+BuildRequires:	libpcap-devel
 BuildRequires:	libstdc++-devel >= 6:4.0
 BuildRequires:	pcre-cxx-devel
 BuildRequires:	pcre-devel
@@ -45,24 +42,57 @@ obiektów danych binarnych oraz automatyczne dzielenie.
 Ten pakiet zawiera powłokę mongo, narzędzia do eksportu/importu danych
 oraz inne narzędzia klienckie.
 
+%package libs
+Summary:	MongoDB client library
+Summary(pl.UTF-8):	Biblioteka kliencka MongoDB
+Group:		Libraries
+
+%description libs
+Mongo (from "huMONGOus") is a schema-free document-oriented database.
+
+This package provides the mongo client library.
+
+%description libs -l pl.UTF-8
+Mongo (od "huMONGOus") to baza danych zorientowana na dokumenty
+pozbawione schematu.
+
+Ten pakiet zawiera bibliotekę kliencką mongo.
+
 %package devel
-Summary:	Header files and libraries for MongoDB clients development
-Summary(pl.UTF-8):	Pliki nagłówkowe i biblioteki do programowania klientów MongoDB
+Summary:	Header files for MongoDB client library
+Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki klienckiej MongoDB
 Group:		Development/Libraries
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name}-libs = %{version}-%{release}
 
 %description devel
 Mongo (from "huMONGOus") is a schema-free document-oriented database.
 
-This package provides the mongo static library and header files needed
-to develop mongo client software.
+This package provides the header files needed to develop MongoDB
+client software.
 
 %description devel -l pl.UTF-8
 Mongo (od "huMONGOus") to baza danych zorientowana na dokumenty
 pozbawione schematu.
 
-Ten pakiet zawiera bibliotekę statyczną mongo oraz pliki nagłówkowe
-potrzebne do tworzenia oprogramowania klienckiego dla MongoDB
+Ten pakiet zawiera pliki nagłówkowe potrzebne do tworzenia
+oprogramowania klienckiego dla MongoDB.
+
+%package static
+Summary:	Static MongoDB client library
+Summary(pl.UTF-8):	Statyczna biblioteka kliencka MongoDB
+Group:		Development/Libraries
+Requires:	%{name}-libs = %{version}-%{release}
+
+%description static
+Mongo (from "huMONGOus") is a schema-free document-oriented database.
+
+This package provides the MongoDB static client library.
+
+%description static -l pl.UTF-8
+Mongo (od "huMONGOus") to baza danych zorientowana na dokumenty
+pozbawione schematu.
+
+Ten pakiet zawiera statyczną bibliotekę kliencką MongoDB.
 
 %package server
 Summary:	MongoDB server, sharding server, and support scripts
@@ -134,6 +164,9 @@ touch $RPM_BUILD_ROOT%{_var}/log/mongo/mongod.log
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%post	libs -p /sbin/ldconfig
+%postun	libs -p /sbin/ldconfig
+
 %pre server
 %groupadd -g 258 -r mongod
 %useradd -u 258 -r -g mongod -d %{_var}/lib/mongo -s /bin/false -c "MongoDB Database Server" mongod
@@ -163,11 +196,10 @@ fi
 %attr(755,root,root) %{_bindir}/mongofiles
 %attr(755,root,root) %{_bindir}/mongoimport
 %attr(755,root,root) %{_bindir}/mongorestore
-#%%attr(755,root,root) %{_bindir}/mongosniff
+%attr(755,root,root) %{_bindir}/mongosniff
 %attr(755,root,root) %{_bindir}/mongostat
 %attr(755,root,root) %{_bindir}/bsondump
 %{_mandir}/man1/mongo.1*
-%{_mandir}/man1/mongod.1*
 %{_mandir}/man1/mongodump.1*
 %{_mandir}/man1/mongoexport.1*
 %{_mandir}/man1/mongofiles.1*
@@ -175,6 +207,18 @@ fi
 %{_mandir}/man1/mongosniff.1*
 %{_mandir}/man1/mongostat.1*
 %{_mandir}/man1/mongorestore.1*
+
+%files libs
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libmongoclient.so
+
+%files devel
+%defattr(644,root,root,755)
+%{_includedir}/mongo
+
+%files static
+%defattr(644,root,root,755)
+%{_libdir}/libmongoclient.a
 
 %files server
 %defattr(644,root,root,755)
@@ -185,14 +229,8 @@ fi
 %config(noreplace) /etc/logrotate.d/mongod
 %attr(755,root,root) %{_bindir}/mongod
 %attr(755,root,root) %{_bindir}/mongos
+%{_mandir}/man1/mongod.1*
 %{_mandir}/man1/mongos.1*
 %attr(755,mongod,mongod) %dir %{_var}/lib/mongo
 %attr(755,mongod,mongod) %dir %{_var}/log/mongo
 %attr(640,mongod,mongod) %config(noreplace) %verify(not md5 mtime size) %{_var}/log/mongo/mongod.log
-
-%files devel
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libmongoclient.so
-%{_libdir}/libmongoclient.a
-#%{_libdir}/libmongotestfiles.a
-%{_includedir}/mongo
