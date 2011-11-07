@@ -2,15 +2,17 @@
 Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
 Name:		mongodb
-Version:	1.8.4
+Version:	2.0.1
 Release:	1
 License:	AGPL v3
 Group:		Applications/Databases
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
-# Source0-md5:	65da0fe8a08917dafd11b069debbf810
+# Source0-md5:	cb8579074b7c9752eb382a2094ac4523
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
 Patch0:		config.patch
+Patch1:		%{name}-system-libs.patch
+Patch2:		%{name}-build.patch
 URL:		http://www.mongodb.org/
 BuildRequires:	boost-devel >= 1.42
 BuildRequires:	libpcap-devel
@@ -21,6 +23,7 @@ BuildRequires:	readline-devel
 BuildRequires:	rpmbuild(macros) >= 1.228
 BuildRequires:	scons >= 1.2
 BuildRequires:	sed >= 4.0
+BuildRequires:	snappy-devel
 BuildRequires:	v8-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -126,10 +129,15 @@ konfiguracji oraz skrypty init.d.
 %prep
 %setup -q -n %{name}-src-r%{version}
 %patch0 -p1
-%{__sed} -i 's,-O3,%{rpmcxxflags} %{rpmcppflags},;/,\.\.\/v8/d' SConstruct
+%patch1 -p1
+%patch2 -p1
+%{__sed} -i -e 's,-O3,%{rpmcxxflags} %{rpmcppflags},' SConstruct
 
 # Fix permissions
 find -type f -executable | xargs chmod a-x
+
+# force system pcre/js/snappy
+%{__rm} -r third_party/{js-1.7,pcre-7.4,snappy,*.py}
 
 %build
 %scons \
@@ -190,6 +198,7 @@ fi
 %files
 %defattr(644,root,root,755)
 %doc README GNU-AGPL-3.0.txt
+%attr(755,root,root) %{_bindir}/bsondump
 %attr(755,root,root) %{_bindir}/mongo
 %attr(755,root,root) %{_bindir}/mongodump
 %attr(755,root,root) %{_bindir}/mongoexport
@@ -198,7 +207,8 @@ fi
 %attr(755,root,root) %{_bindir}/mongorestore
 %attr(755,root,root) %{_bindir}/mongosniff
 %attr(755,root,root) %{_bindir}/mongostat
-%attr(755,root,root) %{_bindir}/bsondump
+%attr(755,root,root) %{_bindir}/mongotop
+%{_mandir}/man1/bsondump.1*
 %{_mandir}/man1/mongo.1*
 %{_mandir}/man1/mongodump.1*
 %{_mandir}/man1/mongoexport.1*

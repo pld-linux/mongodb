@@ -1,14 +1,14 @@
---- mongodb-src-r1.8.3/SConstruct~	2011-09-01 19:06:02.082655213 +0200
-+++ mongodb-src-r1.8.3/SConstruct	2011-09-01 19:07:59.250802930 +0200
-@@ -671,7 +671,6 @@
+--- mongodb-src-r2.0.1/SConstruct.orig	2011-10-22 02:52:16.000000000 +0200
++++ mongodb-src-r2.0.1/SConstruct	2011-11-01 19:46:50.060469479 +0100
+@@ -673,7 +673,6 @@
      env.Append( CPPFLAGS="-fPIC -fno-strict-aliasing -ggdb -pthread -Wall -Wsign-compare -Wno-unknown-pragmas -Winvalid-pch" )
      # env.Append( " -Wconversion" ) TODO: this doesn't really work yet
      if linux:
 -        env.Append( CPPFLAGS=" -Werror " )
-         env.Append( CPPFLAGS=" -fno-builtin-memcmp " ) # glibc's memcmp is faster than gcc's
-     env.Append( CXXFLAGS=" -Wnon-virtual-dtor " )
-     env.Append( LINKFLAGS=" -fPIC -pthread -rdynamic" )
-@@ -679,7 +678,8 @@
+         if not has_option('clang'): 
+             env.Append( CPPFLAGS=" -fno-builtin-memcmp " ) # glibc's memcmp is faster than gcc's
+ 
+@@ -684,7 +683,8 @@
  
      #make scons colorgcc friendly
      env['ENV']['HOME'] = os.environ['HOME']
@@ -18,3 +18,25 @@
  
      if linux and has_option( "sharedclient" ):
          env.Append( LINKFLAGS=" -Wl,--as-needed -Wl,-zdefs " )
+@@ -732,10 +732,6 @@
+         print( "removing precompiled headers" )
+         os.unlink('pch.h.gch') # gcc uses the file if it exists
+ 
+-if usev8:
+-    env.Prepend( CPPPATH=["../v8/include/"] )
+-    env.Prepend( LIBPATH=["../v8/"] )
+-
+ if "uname" in dir(os):
+     hacks = buildscripts.findHacks( os.uname() )
+     if hacks is not None:
+@@ -919,6 +915,10 @@
+         else:
+             myCheckLib( "v8" , True )
+ 
++    myCheckLib(["pcrecpp"], True)
++    myCheckLib(["pcre"], True)
++    myCheckLib(["snappy"], True)
++
+     # requires ports devel/libexecinfo to be installed
+     if freebsd or openbsd:
+         myCheckLib( "execinfo", True )

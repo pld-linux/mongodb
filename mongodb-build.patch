@@ -1,0 +1,20 @@
+--- mongodb-src-r2.0.1/SConstruct.orig	2011-11-07 17:32:11.944223596 +0100
++++ mongodb-src-r2.0.1/SConstruct	2011-11-07 17:35:10.547562910 +0100
+@@ -327,7 +327,7 @@
+ 
+ # ------    SOURCE FILE SETUP -----------
+ 
+-commonFiles = Split( "pch.cpp buildinfo.cpp db/indexkey.cpp db/jsobj.cpp bson/oid.cpp db/json.cpp db/lasterror.cpp db/nonce.cpp db/queryutil.cpp db/querypattern.cpp db/projection.cpp shell/mongo.cpp db/security_common.cpp db/security_commands.cpp" )
++commonFiles = Split( "pch.cpp buildinfo.cpp db/indexkey.cpp db/jsobj.cpp bson/oid.cpp db/json.cpp db/lasterror.cpp db/nonce.cpp db/queryutil.cpp db/querypattern.cpp db/projection.cpp shell/mongo.cpp" )
+ commonFiles += [ "util/background.cpp" , "util/util.cpp" , "util/file_allocator.cpp" ,
+                  "util/assert_util.cpp" , "util/log.cpp" , "util/ramlog.cpp" , "util/md5main.cpp" , "util/base64.cpp", "util/concurrency/vars.cpp", "util/concurrency/task.cpp", "util/debug_util.cpp",
+                  "util/concurrency/thread_pool.cpp", "util/password.cpp", "util/version.cpp", "util/signal_handlers.cpp",  
+@@ -343,7 +343,7 @@
+ coreServerFiles = [ "util/net/message_server_port.cpp" , 
+                     "client/parallel.cpp" , "db/common.cpp", 
+                     "util/net/miniwebserver.cpp" , "db/dbwebserver.cpp" , 
+-                    "db/matcher.cpp" , "db/dbcommands_generic.cpp" , "db/dbmessage.cpp" ]
++                    "db/matcher.cpp" , "db/dbcommands_generic.cpp" , "db/dbmessage.cpp", "db/security_common.cpp", "db/security_commands.cpp"]
+ 
+ mmapFiles = [ "util/mmap.cpp" ]
+ 
