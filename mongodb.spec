@@ -140,7 +140,6 @@ find -type f -executable | xargs chmod a-x
 %{__rm} -r third_party/{js-1.7,pcre-7.4,snappy,*.py}
 
 %build
-export LDFLAGS="%{rpmldflags} =-fuse-ld=bfd"
 %scons \
 	--prefix=$RPM_BUILD_ROOT%{_prefix} \
 	--sharedclient \
@@ -155,7 +154,6 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
 	$RPM_BUILD_ROOT%{_var}/{lib,log}/mongo
 
 # XXX: scons is so great, recompiles everything here!
-export LDFLAGS="%{rpmldflags} =-fuse-ld=bfd"
 %scons install \
 	--prefix=$RPM_BUILD_ROOT%{_prefix} \
 	--sharedclient \

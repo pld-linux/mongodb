@@ -18,3 +18,12 @@
  
  mmapFiles = [ "util/mmap.cpp" ]
  
+@@ -1131,7 +1131,7 @@
+         sniffEnv.Append( LIBS=[ "wpcap" ] )
+ 
+     sniffEnv.Prepend( LIBPATH=["."] )
+-    sniffEnv.Append( LIBS=[ "mongotestfiles" ] )
++    sniffEnv.Prepend( LIBS=[ "mongotestfiles" ] )
+ 
+     sniffEnv.Program( "mongosniff" , "tools/sniffer.cpp" )
+ 
