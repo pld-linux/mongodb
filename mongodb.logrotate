@@ -1,11 +1,12 @@
 /var/log/mongo/*.log {
-  weekly
-  rotate 10
-  copytruncate
-  delaycompress
-  compress
-  notifempty
-  missingok
+	su mongod mongod
+	weekly
+	rotate 10
+	copytruncate
+	delaycompress
+	compress
+	notifempty
+	missingok
 }
 
 

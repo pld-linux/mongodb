@@ -3,7 +3,7 @@ Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
 Name:		mongodb
 Version:	2.0.1
-Release:	1
+Release:	2
 License:	AGPL v3
 Group:		Applications/Databases
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
@@ -102,8 +102,6 @@ Summary:	MongoDB server, sharding server, and support scripts
 Summary(pl.UTF-8):	Serwer MongoDB, serwer dzielący oraz skrypty pomocnicze
 Group:		Applications/Databases
 Requires:	%{name} = %{version}-%{release}
-Provides:	group(mongod)
-Provides:	user(mongod)
 Requires(post,preun):	/sbin/chkconfig
 Requires(postun):	/usr/sbin/groupdel
 Requires(postun):	/usr/sbin/userdel
@@ -112,6 +110,9 @@ Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	rc-scripts
+Provides:	group(mongod)
+Provides:	user(mongod)
+Conflicts:	logrotate < 3.8.0
 
 %description server
 Mongo (from "huMONGOus") is a schema-free document-oriented database.
