@@ -1,22 +1,20 @@
 #!/bin/sh
 #
-# /etc/init.d/mongod
+# mongod		mongod
 #
-### BEGIN INIT INFO
-# Provides:          mongod
-# Required-Start: $syslog $local_fs $network  
-# Required-Stop:  $syslog $local_fs $network  
-# Should-Start:   $remote_fs
-# Should-Stop:    $remote_fs
-# Default-Start:     3 4 5
-# Default-Stop:      0 1 2 6
-# Short-Description: MongoDB server
-# Description:       Starts and stops the MongoDB daemon
-### END INIT INFO
+# chkconfig:	345 60 40
+#
+# description:	mongod is a cache daemon.
+#
+# processname:	mongod
+# pidfile:      /var/run/mongod.pid
+#
 
+# Source function library
+. /etc/rc.d/init.d/functions
 
-# Check for missing binaries (stale symlinks should not happen)
-# Note: Special treatment of stop for LSB conformance
+# Get network config
+. /etc/sysconfig/network
 
 MONGOD_BIN="/usr/bin/mongod"
 MONGOD_LOGFILE="/var/log/mongo/mongod.log"
@@ -26,117 +24,83 @@ MONGOD_CONFIG="/etc/sysconfig/mongod"
 MONGOD_USER=mongod
 MONGOD_GROUP=mongod
 
-test -x $MONGOD_BIN || { echo "$MONGOD_BIN not installed"; 
-        if [ "$1" = "stop" ]; then exit 0;
-        else exit 5; fi; }
+# Get service config
+[ -f /etc/sysconfig/mongod ] && . /etc/sysconfig/mongod
 
-# Check for existence of needed config file and read it
-# test -r $MONGOD_CONFIG || { echo "$MONGOD_CONFIG not existing";
-#         if [ "$1" = "stop" ]; then exit 0;
-#         else exit 6; fi; }
-# Read config
-# . $MONGOD_CONFIG
+start() {
+	# Check if the service is already running?
+	if [ -f /var/lock/subsys/mongod ]; then
+		msg_already_running "mongod"
+		return
+	fi
 
-# Read config
-[ -e $MONGOD_CONFIG ] && . $MONGOD_CONFIG
+    msg_starting "mongod"
+    daemon --pidfile $MONGOD_PIDFILE --user $MONGOD_USER \
+        $MONGOD_BIN --config /etc/mongod.conf run
+    ret=$?
+    [ $ret = 0 ] || RETVAL=$?
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/mongod
+}
 
+stop() {
+	if [ ! -f /var/lock/subsys/mongod ]; then
+		msg_not_running "mongod"
+		return
+	fi
 
-# Source LSB init functions
-# providing start_daemon, killproc, pidofproc, 
-# log_success_msg, log_failure_msg and log_warning_msg.
-# This is currently not used by UnitedLinux based distributions and
-# not needed for init scripts for UnitedLinux only. If it is used,
-# the functions from rc.status should not be sourced or used.
-#. /lib/lsb/init-functions
+    msg_stopping "mongod"
+    killproc --pidfile $MONGOD_PIDFILE mongod
+	rm -f /var/lock/subsys/mongod >/dev/null 2>&1
+}
 
-# Shell functions sourced from /etc/rc.status:
-#      rc_check         check and set local and overall rc status
-#      rc_status        check and set local and overall rc status
-#      rc_status -v     be verbose in local rc status and clear it afterwards
-#      rc_status -v -r  ditto and clear both the local and overall rc status
-#      rc_status -s     display "skipped" and exit with status 3
-#      rc_status -u     display "unused" and exit with status 3
-#      rc_failed        set local and overall rc status to failed
-#      rc_failed <num>  set local and overall rc status to <num>
-#      rc_reset         clear both the local and overall rc status
-#      rc_exit          exit appropriate to overall rc status
-#      rc_active        checks whether a service is activated by symlinks
-. /etc/rc.status
+condrestart() {
+	if [ ! -f /var/lock/subsys/mongod ]; then
+		msg_not_running "mongod"
+		RETVAL=$1
+		return
+	fi
 
-# Reset status of this service
-rc_reset
+	stop
+	start
+}
 
-# Return values acc. to LSB for all commands but status:
-# 0          - success
-# 1       - generic or unspecified error
-# 2       - invalid or excess argument(s)
-# 3       - unimplemented feature (e.g. "reload")
-# 4       - user had insufficient privileges
-# 5       - program is not installed
-# 6       - program is not configured
-# 7       - program is not running
-# 8--199  - reserved (8--99 LSB, 100--149 distrib, 150--199 appl)
-# 
-# Note that starting an already running service, stopping
-# or restarting a not-running service as well as the restart
-# with force-reload (in case signaling is not supported) are
-# considered a success.
+reload() {
+	if [ ! -f /var/lock/subsys/mongod ]; then
+		msg_not_running "mongod"
+		RETVAL=7
+		return
+	fi
 
-# Set ulimit setting
-# ulimit -n 10240
-ulimit -n 12000
+    msg_reloading "mongod"
+    killproc --pidfile $MONGOD_PIDFILE mongod -HUP
+}
 
+RETVAL=0
+# See how we were called.
 case "$1" in
-    start)
-        echo -n "Starting service MongoDB "
-        ## Start daemon with startproc(8). If this fails
-        ## the return value is set appropriately by startproc.
-        /sbin/startproc -u $MONGOD_USER -g $MONGOD_GROUP -s -e $MONGOD_BIN --config /etc/mongod.conf run
-        # Remember status and be verbose
-        rc_status -v
-        ;;
-    stop)
-        echo -n "Stopping service MongoDB "
-#        killproc -p /var/lib/mongo/mongod.lock -t30 -TERM /usr/bin/mongod
-        /sbin/killproc -TERM $MONGOD_BIN
-        rc_status -v
-        ;;
-    try-restart|condrestart)
-        ## Do a restart only if the service was active before.
-        ## Note: try-restart is now part of LSB (as of 1.9).
-        ## RH has a similar command named condrestart.
-        if test "$1" = "condrestart"; then
-            echo "${attn} Use try-restart ${done}(LSB)${attn} rather than condrestart ${warn}(RH)${norm}"
-        fi
-        $0 status
-        if test $? = 0; then
-            $0 restart
-        else
-            rc_reset        # Not running is not a failure.
-        fi
-        # Remember status and be quiet
-        rc_status
-        ;;
-    restart)
-        ## Stop the service and regardless of whether it was
-        ## running or not, start it again.
-        $0 stop
-        $0 start
-
-        # Remember status and be quiet
-        rc_status
-        ;;
-    reload)
-        $0 restart
-        ;;
-    status)
-        echo -n "Checking for service MongoDB: "
-        /sbin/checkproc -p $MONGOD_PIDFILE $MONGOD_BIN
-        rc_status -v
-        ;;
-    *)
-        echo "Usage: $0 {start|stop|status|try-restart|restart|reload}"
-        exit 1
-        ;;
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart)
+	stop
+	start
+	;;
+  try-restart)
+	condrestart 0
+	;;
+  reload|force-reload)
+  	reload
+	;;
+  status)
+	status mongod
+	exit $?
+	;;
+  *)
+	msg_usage "$0 {start|stop|restart|try-restart|reload|force-reload|status}"
+	exit 3
 esac
-rc_exit
+
+exit $RETVAL
