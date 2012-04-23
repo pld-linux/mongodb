@@ -45,11 +45,11 @@ start() {
 		return
 	fi
 
-    msg_starting "mongod"
-    daemon --pidfile $MONGOD_PIDFILE --user $MONGOD_USER \
-        $MONGOD_BIN --config /etc/mongod.conf run
-    ret=$?
-    [ $ret = 0 ] || RETVAL=$?
+	msg_starting "mongod"
+	daemon --pidfile $MONGOD_PIDFILE --user $MONGOD_USER \
+		$MONGOD_BIN --config /etc/mongod.conf run
+	ret=$?
+	[ $ret = 0 ] || RETVAL=$?
 	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/mongod
 }
 
@@ -59,8 +59,8 @@ stop() {
 		return
 	fi
 
-    msg_stopping "mongod"
-    killproc --pidfile $MONGOD_PIDFILE mongod
+	msg_stopping "mongod"
+	killproc --pidfile $MONGOD_PIDFILE mongod
 	rm -f /var/lock/subsys/mongod >/dev/null 2>&1
 }
 
@@ -82,8 +82,8 @@ reload() {
 		return
 	fi
 
-    msg_reloading "mongod"
-    killproc --pidfile $MONGOD_PIDFILE mongod -HUP
+	msg_reloading "mongod"
+	killproc --pidfile $MONGOD_PIDFILE mongod -HUP
 }
 
 RETVAL=0
