@@ -9,6 +9,17 @@
 # processname:	mongod
 # pidfile:      /var/run/mongod.pid
 #
+### BEGIN INIT INFO
+# Provides:          mongod
+# Required-Start: $syslog $local_fs $network
+# Required-Stop:  $syslog $local_fs $network
+# Should-Start:   $remote_fs
+# Should-Stop:    $remote_fs
+# Default-Start:     3 4 5
+# Default-Stop:      0 1 2 6
+# Short-Description: MongoDB server
+# Description:       Starts and stops the MongoDB daemon
+### END INIT INFO
 
 # Source function library
 . /etc/rc.d/init.d/functions
