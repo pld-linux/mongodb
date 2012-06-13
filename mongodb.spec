@@ -2,12 +2,12 @@
 Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
 Name:		mongodb
-Version:	2.0.1
-Release:	4
+Version:	2.0.6
+Release:	1
 License:	AGPL v3
 Group:		Applications/Databases
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
-# Source0-md5:	cb8579074b7c9752eb382a2094ac4523
+# Source0-md5:	b3b32fecdcbe8e8068ec2989be9d2da4
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
 Patch0:		config.patch

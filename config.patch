@@ -8,16 +8,6 @@
          if not has_option('clang'): 
              env.Append( CPPFLAGS=" -fno-builtin-memcmp " ) # glibc's memcmp is faster than gcc's
  
-@@ -684,7 +683,8 @@
- 
-     #make scons colorgcc friendly
-     env['ENV']['HOME'] = os.environ['HOME']
--    env['ENV']['TERM'] = os.environ['TERM']
-+    if 'TERM' in os.environ:
-+        env['ENV']['TERM'] = os.environ['TERM']
- 
-     if linux and has_option( "sharedclient" ):
-         env.Append( LINKFLAGS=" -Wl,--as-needed -Wl,-zdefs " )
 @@ -732,10 +732,6 @@
          print( "removing precompiled headers" )
          os.unlink('pch.h.gch') # gcc uses the file if it exists
