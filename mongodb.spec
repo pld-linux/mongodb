@@ -233,7 +233,7 @@ fi
 
 %files server
 %defattr(644,root,root,755)
-%dir %{_sysconfdir}
+#%dir %{_sysconfdir}
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/mongod.conf
 %attr(754,root,root) /etc/rc.d/init.d/mongod
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/mongod
