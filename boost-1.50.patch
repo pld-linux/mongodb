@@ -112,3 +112,75 @@ diff -ur mongodb-src-r2.0.6.orig/util/time_support.h mongodb-src-r2.0.6/util/tim
          unsigned t = xt.nsec / 1000;
          unsigned secs = xt.sec % 1024;
          return secs*1000000 + t;
+diff -ur mongodb-src-r2.0.6.orig/db/db.cpp mongodb-src-r2.0.6/db/db.cpp
+--- mongodb-src-r2.0.6.orig/db/db.cpp	2012-06-04 15:42:54.000000000 +0200
++++ mongodb-src-r2.0.6/db/db.cpp	2012-07-11 14:39:15.945377899 +0200
+@@ -976,7 +976,7 @@
+         if (params.count("shutdown")){
+             bool failed = false;
+ 
+-            string name = ( boost::filesystem::path( dbpath ) / "mongod.lock" ).native_file_string();
++            string name = ( boost::filesystem::path( dbpath ) / "mongod.lock" ).native();
+             if ( !boost::filesystem::exists( name ) || boost::filesystem::file_size( name ) == 0 )
+                 failed = true;
+ 
+diff -ur mongodb-src-r2.0.6.orig/db/dur.cpp mongodb-src-r2.0.6/db/dur.cpp
+--- mongodb-src-r2.0.6.orig/db/dur.cpp	2012-06-04 15:42:54.000000000 +0200
++++ mongodb-src-r2.0.6/db/dur.cpp	2012-07-11 14:38:50.248712139 +0200
+@@ -692,7 +692,7 @@
+ 
+             bool samePartition = true;
+             try {
+-                const string dbpathDir = boost::filesystem::path(dbpath).native_directory_string();
++                const string dbpathDir = boost::filesystem::path(dbpath).native();
+                 samePartition = onSamePartition(getJournalDir().string(), dbpathDir);
+             }
+             catch(...) {
+diff -ur mongodb-src-r2.0.6.orig/db/instance.cpp mongodb-src-r2.0.6/db/instance.cpp
+--- mongodb-src-r2.0.6.orig/db/instance.cpp	2012-06-04 15:42:54.000000000 +0200
++++ mongodb-src-r2.0.6/db/instance.cpp	2012-07-11 14:39:15.948711232 +0200
+@@ -893,7 +893,7 @@
+     }
+ 
+     void acquirePathLock(bool doingRepair) {
+-        string name = ( boost::filesystem::path( dbpath ) / "mongod.lock" ).native_file_string();
++        string name = ( boost::filesystem::path( dbpath ) / "mongod.lock" ).native();
+ 
+         bool oldFile = false;
+ 
+diff -ur mongodb-src-r2.0.6.orig/db/pdfile.cpp mongodb-src-r2.0.6/db/pdfile.cpp
+--- mongodb-src-r2.0.6.orig/db/pdfile.cpp	2012-06-04 15:42:54.000000000 +0200
++++ mongodb-src-r2.0.6/db/pdfile.cpp	2012-07-11 14:38:50.252045472 +0200
+@@ -2093,7 +2093,7 @@
+             uniqueReservedPath( ( preserveClonedFilesOnFailure || backupOriginalFiles ) ?
+                                 "backup" : "$tmp" );
+         BOOST_CHECK_EXCEPTION( boost::filesystem::create_directory( reservedPath ) );
+-        string reservedPathString = reservedPath.native_directory_string();
++        string reservedPathString = reservedPath.native();
+ 
+         bool res;
+         {
+diff -ur mongodb-src-r2.0.6.orig/dbtests/framework.cpp mongodb-src-r2.0.6/dbtests/framework.cpp
+--- mongodb-src-r2.0.6.orig/dbtests/framework.cpp	2012-06-04 15:42:54.000000000 +0200
++++ mongodb-src-r2.0.6/dbtests/framework.cpp	2012-07-11 14:38:50.252045472 +0200
+@@ -281,7 +281,7 @@
+                 boost::filesystem::create_directory(p);
+             }
+ 
+-            string dbpathString = p.native_directory_string();
++            string dbpathString = p.native();
+             dbpath = dbpathString.c_str();
+ 
+             cmdLine.prealloc = false;
+diff -ur mongodb-src-r2.0.6.orig/shell/shell_utils.cpp mongodb-src-r2.0.6/shell/shell_utils.cpp
+--- mongodb-src-r2.0.6.orig/shell/shell_utils.cpp	2012-06-04 15:42:54.000000000 +0200
++++ mongodb-src-r2.0.6/shell/shell_utils.cpp	2012-07-11 14:39:15.948711232 +0200
+@@ -388,7 +388,7 @@
+ #endif
+                 }
+ 
+-                argv_.push_back( programPath.native_file_string() );
++                argv_.push_back( programPath.native() );
+ 
+                 port_ = -1;
+ 
