@@ -115,6 +115,20 @@ diff -ur mongodb-src-r2.0.6.orig/util/time_support.h mongodb-src-r2.0.6/util/tim
 diff -ur mongodb-src-r2.0.6.orig/db/db.cpp mongodb-src-r2.0.6/db/db.cpp
 --- mongodb-src-r2.0.6.orig/db/db.cpp	2012-06-04 15:42:54.000000000 +0200
 +++ mongodb-src-r2.0.6/db/db.cpp	2012-07-11 14:39:15.945377899 +0200
+@@ -655,11 +655,13 @@
+     dbExecCommand = argv[0];
+ 
+     srand(curTimeMicros());
++#if( BOOST_VERSION < 105000 )
+ #if( BOOST_VERSION >= 104500 )
+     boost::filesystem::path::default_name_check( boost::filesystem2::no_check );
+ #else
+     boost::filesystem::path::default_name_check( boost::filesystem::no_check );
+ #endif
++#endif
+ 
+     {
+         unsigned x = 0x12345678;
 @@ -976,7 +976,7 @@
          if (params.count("shutdown")){
              bool failed = false;
@@ -184,3 +198,157 @@ diff -ur mongodb-src-r2.0.6.orig/shell/shell_utils.cpp mongodb-src-r2.0.6/shell/
  
                  port_ = -1;
  
+--- mongodb-src-r2.0.6/db/dur_journal.cpp~	2012-06-04 15:42:54.000000000 +0200
++++ mongodb-src-r2.0.6/db/dur_journal.cpp	2012-07-11 14:43:04.345369843 +0200
+@@ -169,7 +169,7 @@
+                 for ( boost::filesystem::directory_iterator i( getJournalDir() );
+                         i != boost::filesystem::directory_iterator();
+                         ++i ) {
+-                    string fileName = boost::filesystem::path(*i).leaf();
++                    string fileName = boost::filesystem::path(*i).filename().string();
+                     if( str::startsWith(fileName, "j._") )
+                         return true;
+                 }
+@@ -185,7 +185,7 @@
+                 for ( boost::filesystem::directory_iterator i( getJournalDir() );
+                         i != boost::filesystem::directory_iterator();
+                         ++i ) {
+-                    string fileName = boost::filesystem::path(*i).leaf();
++                    string fileName = boost::filesystem::path(*i).filename().string();
+                     if( str::startsWith(fileName, "j._") ) {
+                         try {
+                             removeOldJournalFile(*i);
+--- mongodb-src-r2.0.6/db/dur_recover.cpp~	2012-06-04 15:42:54.000000000 +0200
++++ mongodb-src-r2.0.6/db/dur_recover.cpp	2012-07-11 14:43:24.775369122 +0200
+@@ -71,7 +71,7 @@
+                     i != filesystem::directory_iterator();
+                     ++i ) {
+                 filesystem::path filepath = *i;
+-                string fileName = filesystem::path(*i).leaf();
++                string fileName = filesystem::path(*i).filename().string();
+                 if( str::startsWith(fileName, "j._") ) {
+                     unsigned u = str::toUnsigned( str::after(fileName, '_') );
+                     if( m.count(u) ) {
+@@ -84,7 +84,7 @@
+                 if( i != m.begin() && m.count(i->first - 1) == 0 ) {
+                     uasserted(13532,
+                     str::stream() << "unexpected file in journal directory " << dir.string()
+-                      << " : " << filesystem::path(i->second).leaf() << " : can't find its preceeding file");
++                      << " : " << filesystem::path(i->second).filename().string() << " : can't find its preceeding file");
+                 }
+                 files.push_back(i->second);
+             }
+--- mongodb-src-r2.0.6/db/instance.cpp~	2012-07-11 14:39:59.022043046 +0200
++++ mongodb-src-r2.0.6/db/instance.cpp	2012-07-11 14:43:51.298701519 +0200
+@@ -645,13 +645,13 @@
+                 i != boost::filesystem::directory_iterator(); ++i ) {
+             if ( directoryperdb ) {
+                 boost::filesystem::path p = *i;
+-                string dbName = p.leaf();
++                string dbName = p.filename().string();
+                 p /= ( dbName + ".ns" );
+                 if ( MMF::exists( p ) )
+                     names.push_back( dbName );
+             }
+             else {
+-                string fileName = boost::filesystem::path(*i).leaf();
++                string fileName = boost::filesystem::path(*i).filename().string();
+                 if ( fileName.length() > 3 && fileName.substr( fileName.length() - 3, 3 ) == ".ns" )
+                     names.push_back( fileName.substr( 0, fileName.length() - 3 ) );
+             }
+--- mongodb-src-r2.0.6/db/pdfile.cpp~	2012-07-11 14:39:59.022043046 +0200
++++ mongodb-src-r2.0.6/db/pdfile.cpp	2012-07-11 14:44:07.945367599 +0200
+@@ -1987,7 +1987,7 @@
+             virtual bool apply( const Path &p ) {
+                 if ( !boost::filesystem::exists( p ) )
+                     return false;
+-                boostRenameWrapper( p, newPath_ / ( p.leaf() + ".bak" ) );
++                boostRenameWrapper( p, newPath_ / ( p.filename().string() + ".bak" ) );
+                 return true;
+             }
+             virtual const char * op() const {
+@@ -2010,7 +2010,7 @@
+             virtual bool apply( const Path &p ) {
+                 if ( !boost::filesystem::exists( p ) )
+                     return false;
+-                boostRenameWrapper( p, newPath_ / p.leaf() );
++                boostRenameWrapper( p, newPath_ / p.filename().string() );
+                 return true;
+             }
+             virtual const char * op() const {
+--- mongodb-src-r2.0.6/tools/tool.cpp~	2012-06-04 15:42:54.000000000 +0200
++++ mongodb-src-r2.0.6/tools/tool.cpp	2012-07-11 14:51:25.822018820 +0200
+@@ -113,11 +113,13 @@
+         // we want durability to be disabled.
+         cmdLine.dur = false;
+ 
++#if( BOOST_VERSION < 105000 )
+ #if( BOOST_VERSION >= 104500 )
+     boost::filesystem::path::default_name_check( boost::filesystem2::no_check );
+ #else
+     boost::filesystem::path::default_name_check( boost::filesystem::no_check );
+ #endif
++#endif
+ 
+         _name = argv[0];
+ 
+--- mongodb-src-r2.0.6/tools/restore.cpp~	2012-06-04 15:42:54.000000000 +0200
++++ mongodb-src-r2.0.6/tools/restore.cpp	2012-07-11 14:53:11.865348411 +0200
+@@ -131,7 +131,7 @@
+         log(2) << "drillDown: " << root.string() << endl;
+ 
+         // skip hidden files and directories
+-        if (root.leaf()[0] == '.' && root.leaf() != ".")
++        if (root.filename().string()[0] == '.' && root.filename().string() != ".")
+             return;
+ 
+         if ( is_directory( root ) ) {
+@@ -161,10 +161,10 @@
+                 }
+ 
+                 // don't insert oplog
+-                if (top_level && !use_db && p.leaf() == "oplog.bson")
++                if (top_level && !use_db && p.filename().string() == "oplog.bson")
+                     continue;
+ 
+-                if ( p.leaf() == "system.indexes.bson" )
++                if ( p.filename().string() == "system.indexes.bson" )
+                     indexes = p;
+                 else
+                     drillDown(p, use_db, use_coll);
+@@ -184,7 +184,7 @@
+ 
+         log() << root.string() << endl;
+ 
+-        if ( root.leaf() == "system.profile.bson" ) {
++        if ( root.filename().string() == "system.profile.bson" ) {
+             log() << "\t skipping" << endl;
+             return;
+         }
+@@ -210,7 +210,7 @@
+             ns += "." + _coll;
+         }
+         else {
+-            string l = root.leaf();
++            string l = root.filename().string();
+             l = l.substr( 0 , l.find_last_of( "." ) );
+             ns += "." + l;
+         }
+@@ -218,7 +218,7 @@
+         out() << "\t going into namespace [" << ns << "]" << endl;
+ 
+         if ( _drop ) {
+-            if (root.leaf() != "system.users.bson" ) {
++            if (root.filename().string() != "system.users.bson" ) {
+                 out() << "\t dropping" << endl;
+                 conn().dropCollection( ns );
+             } else {
+@@ -235,7 +235,7 @@
+         _curns = ns.c_str();
+         _curdb = NamespaceString(_curns).db;
+         processFile( root );
+-        if (_drop && root.leaf() == "system.users.bson") {
++        if (_drop && root.filename().string() == "system.users.bson") {
+             // Delete any users that used to exist but weren't in the dump file
+             for (set<string>::iterator it = _users.begin(); it != _users.end(); ++it) {
+                 BSONObj userMatch = BSON("user" << *it);
