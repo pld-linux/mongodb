@@ -115,6 +115,15 @@ diff -ur mongodb-src-r2.0.6.orig/util/time_support.h mongodb-src-r2.0.6/util/tim
 diff -ur mongodb-src-r2.0.6.orig/db/db.cpp mongodb-src-r2.0.6/db/db.cpp
 --- mongodb-src-r2.0.6.orig/db/db.cpp	2012-06-04 15:42:54.000000000 +0200
 +++ mongodb-src-r2.0.6/db/db.cpp	2012-07-11 14:39:15.945377899 +0200
+@@ -326,7 +326,7 @@
+         boost::filesystem::path path( dbpath );
+         for ( boost::filesystem::directory_iterator i( path );
+                 i != boost::filesystem::directory_iterator(); ++i ) {
+-            string fileName = boost::filesystem::path(*i).leaf();
++            string fileName = boost::filesystem::path(*i).filename().string();
+             if ( boost::filesystem::is_directory( *i ) &&
+                     fileName.length() && fileName[ 0 ] == '$' )
+                 boost::filesystem::remove_all( *i );
 @@ -655,11 +655,13 @@
      dbExecCommand = argv[0];
  
