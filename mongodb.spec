@@ -13,6 +13,7 @@ Source2:	%{name}.init
 Patch0:		config.patch
 Patch1:		%{name}-system-libs.patch
 Patch2:		%{name}-build.patch
+Patch3:		boost-1.50.patch
 URL:		http://www.mongodb.org/
 BuildRequires:	boost-devel >= 1.42
 BuildRequires:	libpcap-devel
@@ -132,6 +133,7 @@ konfiguracji oraz skrypty init.d.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 %{__sed} -i -e 's,-O3,%{rpmcxxflags} %{rpmcppflags},' SConstruct
 
 # Fix permissions

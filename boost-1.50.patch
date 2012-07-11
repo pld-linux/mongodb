@@ -1,0 +1,11 @@
+--- mongodb-src-r2.0.6/pch.h~	2012-06-04 15:42:54.000000000 +0200
++++ mongodb-src-r2.0.6/pch.h	2012-07-11 14:32:55.482057987 +0200
+@@ -79,7 +79,7 @@
+ //#include <boost/any.hpp>
+ #include "boost/thread/once.hpp"
+ //#include <boost/archive/iterators/transform_width.hpp>
+-#define BOOST_FILESYSTEM_VERSION 2
++#define BOOST_FILESYSTEM_VERSION 3
+ #include <boost/filesystem/convenience.hpp>
+ #include <boost/filesystem/exception.hpp>
+ #include <boost/filesystem/operations.hpp>
