@@ -3,7 +3,7 @@ Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
 Name:		mongodb
 Version:	2.0.6
-Release:	2
+Release:	3
 License:	AGPL v3
 Group:		Applications/Databases
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
@@ -153,7 +153,7 @@ find -type f -executable | xargs chmod a-x
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
-	$RPM_BUILD_ROOT/etc/{logrotate.d,rc.d/init.d,sysconfig} \
+	$RPM_BUILD_ROOT/etc/{logrotate.d,rc.d/init.d,sysconfig,mongod} \
 	$RPM_BUILD_ROOT%{_var}/{lib,log}/mongo
 
 # XXX: scons is so great, recompiles everything here!
@@ -167,7 +167,7 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
 cp -p %{SOURCE1} $RPM_BUILD_ROOT/etc/logrotate.d/mongod
 install -p %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/mongod
 cp -p rpm/mongod.sysconfig $RPM_BUILD_ROOT/etc/sysconfig/mongod
-cp -p rpm/mongod.conf $RPM_BUILD_ROOT%{_sysconfdir}/mongod.conf
+cp -p rpm/mongod.conf $RPM_BUILD_ROOT%{_sysconfdir}/mongod/default.conf
 cp -p debian/*.1 $RPM_BUILD_ROOT%{_mandir}/man1
 
 touch $RPM_BUILD_ROOT%{_var}/log/mongo/mongod.log
@@ -196,6 +196,13 @@ fi
 if [ "$1" = "0" ]; then
 	%userremove mongod
 	%groupremove mongod
+fi
+
+%triggerpostun server -- %{name}-server < 2.0.6-3
+if [ -f %{_sysconfdir}/mongod.conf.rpmsave ] ; then
+	cp -f %{_sysconfdir}/mongod/default.conf{,.rpmnew} || :
+	echo "Moving %{_sysconfdir}/mongod.conf to %{_sysconfdir}/mongod/default.conf"
+	mv -f %{_sysconfdir}/mongod.conf.rpmsave %{_sysconfdir}/mongod/default.conf
 fi
 
 %files
@@ -236,7 +243,8 @@ fi
 %files server
 %defattr(644,root,root,755)
 #%dir %{_sysconfdir}
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/mongod.conf
+%dir %{_sysconfdir}/mongod
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/mongod/default.conf
 %attr(754,root,root) /etc/rc.d/init.d/mongod
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/mongod
 %config(noreplace) /etc/logrotate.d/mongod
