@@ -203,6 +203,7 @@ if [ -f %{_sysconfdir}/mongod.conf.rpmsave ] ; then
 	cp -f %{_sysconfdir}/mongod/default.conf{,.rpmnew} || :
 	echo "Moving %{_sysconfdir}/mongod.conf to %{_sysconfdir}/mongod/default.conf"
 	mv -f %{_sysconfdir}/mongod.conf.rpmsave %{_sysconfdir}/mongod/default.conf
+	%service mongod restart
 fi
 
 %files
