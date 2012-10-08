@@ -1,121 +1,7 @@
---- mongodb-src-r2.0.6/pch.h~	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/pch.h	2012-07-11 14:32:55.482057987 +0200
-@@ -79,7 +79,7 @@
- //#include <boost/any.hpp>
- #include "boost/thread/once.hpp"
- //#include <boost/archive/iterators/transform_width.hpp>
--#define BOOST_FILESYSTEM_VERSION 2
-+#define BOOST_FILESYSTEM_VERSION 3
- #include <boost/filesystem/convenience.hpp>
- #include <boost/filesystem/exception.hpp>
- #include <boost/filesystem/operations.hpp>
-Binary files mongodb-src-r2.0.6.orig/lib/libboost_thread-gcc41-mt-d-1_34_1.a and mongodb-src-r2.0.6/lib/libboost_thread-gcc41-mt-d-1_34_1.a differ
-diff -ur mongodb-src-r2.0.6.orig/util/background.cpp mongodb-src-r2.0.6/util/background.cpp
---- mongodb-src-r2.0.6.orig/util/background.cpp	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/util/background.cpp	2012-07-11 14:35:09.392053263 +0200
-@@ -89,7 +89,7 @@
-             if ( msTimeOut ) {
-                 // add msTimeOut millisecond to current time
-                 boost::xtime xt;
--                boost::xtime_get( &xt, boost::TIME_UTC );
-+                boost::xtime_get( &xt, boost::TIME_UTC_ );
- 
-                 unsigned long long ns = msTimeOut * 1000000ULL; // milli to nano
-                 if ( xt.nsec + ns < 1000000000 ) {
-diff -ur mongodb-src-r2.0.6.orig/util/concurrency/mutex.h mongodb-src-r2.0.6/util/concurrency/mutex.h
---- mongodb-src-r2.0.6.orig/util/concurrency/mutex.h	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/util/concurrency/mutex.h	2012-07-11 14:35:09.392053263 +0200
-@@ -29,7 +29,7 @@
- 
-     inline boost::xtime incxtimemillis( long long s ) {
-         boost::xtime xt;
--        boost::xtime_get(&xt, boost::TIME_UTC);
-+        boost::xtime_get(&xt, boost::TIME_UTC_);
-         xt.sec += (int)( s / 1000 );
-         xt.nsec += (int)(( s % 1000 ) * 1000000);
-         if ( xt.nsec >= 1000000000 ) {
-diff -ur mongodb-src-r2.0.6.orig/util/queue.h mongodb-src-r2.0.6/util/queue.h
---- mongodb-src-r2.0.6.orig/util/queue.h	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/util/queue.h	2012-07-11 14:35:09.392053263 +0200
-@@ -82,7 +82,7 @@
-             Timer timer;
- 
-             boost::xtime xt;
--            boost::xtime_get(&xt, boost::TIME_UTC);
-+            boost::xtime_get(&xt, boost::TIME_UTC_);
-             xt.sec += maxSecondsToWait;
- 
-             scoped_lock l( _lock );
-diff -ur mongodb-src-r2.0.6.orig/util/time_support.h mongodb-src-r2.0.6/util/time_support.h
---- mongodb-src-r2.0.6.orig/util/time_support.h	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/util/time_support.h	2012-07-11 14:35:09.392053263 +0200
-@@ -106,7 +106,7 @@
-         if ( s <= 0 )
-             return;
-         boost::xtime xt;
--        boost::xtime_get(&xt, boost::TIME_UTC);
-+        boost::xtime_get(&xt, boost::TIME_UTC_);
-         xt.sec += (int)( s / 1000000 );
-         xt.nsec += (int)(( s % 1000000 ) * 1000);
-         if ( xt.nsec >= 1000000000 ) {
-@@ -118,13 +118,13 @@
- #elif defined(__sunos__)
-     inline void sleepsecs(int s) {
-         boost::xtime xt;
--        boost::xtime_get(&xt, boost::TIME_UTC);
-+        boost::xtime_get(&xt, boost::TIME_UTC_);
-         xt.sec += s;
-         boost::thread::sleep(xt);
-     }
-     inline void sleepmillis(long long s) {
-         boost::xtime xt;
--        boost::xtime_get(&xt, boost::TIME_UTC);
-+        boost::xtime_get(&xt, boost::TIME_UTC_);
-         xt.sec += (int)( s / 1000 );
-         xt.nsec += (int)(( s % 1000 ) * 1000000);
-         if ( xt.nsec >= 1000000000 ) {
-@@ -137,7 +137,7 @@
-         if ( s <= 0 )
-             return;
-         boost::xtime xt;
--        boost::xtime_get(&xt, boost::TIME_UTC);
-+        boost::xtime_get(&xt, boost::TIME_UTC_);
-         xt.sec += (int)( s / 1000000 );
-         xt.nsec += (int)(( s % 1000000 ) * 1000);
-         if ( xt.nsec >= 1000000000 ) {
-@@ -202,24 +202,24 @@
- #ifdef _WIN32 // no gettimeofday on windows
-     inline unsigned long long curTimeMillis64() {
-         boost::xtime xt;
--        boost::xtime_get(&xt, boost::TIME_UTC);
-+        boost::xtime_get(&xt, boost::TIME_UTC_);
-         return ((unsigned long long)xt.sec) * 1000 + xt.nsec / 1000000;
-     }
-     inline Date_t jsTime() {
-         boost::xtime xt;
--        boost::xtime_get(&xt, boost::TIME_UTC);
-+        boost::xtime_get(&xt, boost::TIME_UTC_);
-         unsigned long long t = xt.nsec / 1000000;
-         return ((unsigned long long) xt.sec * 1000) + t + getJSTimeVirtualSkew() + getJSTimeVirtualThreadSkew();
-     }
-     inline unsigned long long curTimeMicros64() {
-         boost::xtime xt;
--        boost::xtime_get(&xt, boost::TIME_UTC);
-+        boost::xtime_get(&xt, boost::TIME_UTC_);
-         unsigned long long t = xt.nsec / 1000;
-         return (((unsigned long long) xt.sec) * 1000000) + t;
-     }    
-     inline unsigned curTimeMicros() {
-         boost::xtime xt;
--        boost::xtime_get(&xt, boost::TIME_UTC);
-+        boost::xtime_get(&xt, boost::TIME_UTC_);
-         unsigned t = xt.nsec / 1000;
-         unsigned secs = xt.sec % 1024;
-         return secs*1000000 + t;
-diff -ur mongodb-src-r2.0.6.orig/db/db.cpp mongodb-src-r2.0.6/db/db.cpp
---- mongodb-src-r2.0.6.orig/db/db.cpp	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/db/db.cpp	2012-07-11 14:39:15.945377899 +0200
-@@ -326,7 +326,7 @@
+diff -dur mongodb-src-r2.2.0.orig/src/mongo/db/db.cpp mongodb-src-r2.2.0/src/mongo/db/db.cpp
+--- mongodb-src-r2.2.0.orig/src/mongo/db/db.cpp	2012-08-28 07:28:11.000000000 +0200
++++ mongodb-src-r2.2.0/src/mongo/db/db.cpp	2012-09-28 13:37:59.000000000 +0200
+@@ -348,7 +348,7 @@
          boost::filesystem::path path( dbpath );
          for ( boost::filesystem::directory_iterator i( path );
                  i != boost::filesystem::directory_iterator(); ++i ) {
@@ -124,7 +10,7 @@ diff -ur mongodb-src-r2.0.6.orig/db/db.cpp mongodb-src-r2.0.6/db/db.cpp
              if ( boost::filesystem::is_directory( *i ) &&
                      fileName.length() && fileName[ 0 ] == '$' )
                  boost::filesystem::remove_all( *i );
-@@ -655,11 +655,13 @@
+@@ -748,11 +748,13 @@
      dbExecCommand = argv[0];
  
      srand(curTimeMicros());
@@ -138,7 +24,7 @@ diff -ur mongodb-src-r2.0.6.orig/db/db.cpp mongodb-src-r2.0.6/db/db.cpp
  
      {
          unsigned x = 0x12345678;
-@@ -976,7 +976,7 @@
+@@ -1083,7 +1085,7 @@
          if (params.count("shutdown")){
              bool failed = false;
  
@@ -147,10 +33,10 @@ diff -ur mongodb-src-r2.0.6.orig/db/db.cpp mongodb-src-r2.0.6/db/db.cpp
              if ( !boost::filesystem::exists( name ) || boost::filesystem::file_size( name ) == 0 )
                  failed = true;
  
-diff -ur mongodb-src-r2.0.6.orig/db/dur.cpp mongodb-src-r2.0.6/db/dur.cpp
---- mongodb-src-r2.0.6.orig/db/dur.cpp	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/db/dur.cpp	2012-07-11 14:38:50.248712139 +0200
-@@ -692,7 +692,7 @@
+diff -dur mongodb-src-r2.2.0.orig/src/mongo/db/dur.cpp mongodb-src-r2.2.0/src/mongo/db/dur.cpp
+--- mongodb-src-r2.2.0.orig/src/mongo/db/dur.cpp	2012-08-28 07:28:11.000000000 +0200
++++ mongodb-src-r2.2.0/src/mongo/db/dur.cpp	2012-09-28 13:37:59.000000000 +0200
+@@ -770,7 +770,7 @@
  
              bool samePartition = true;
              try {
@@ -159,66 +45,19 @@ diff -ur mongodb-src-r2.0.6.orig/db/dur.cpp mongodb-src-r2.0.6/db/dur.cpp
                  samePartition = onSamePartition(getJournalDir().string(), dbpathDir);
              }
              catch(...) {
-diff -ur mongodb-src-r2.0.6.orig/db/instance.cpp mongodb-src-r2.0.6/db/instance.cpp
---- mongodb-src-r2.0.6.orig/db/instance.cpp	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/db/instance.cpp	2012-07-11 14:39:15.948711232 +0200
-@@ -893,7 +893,7 @@
-     }
- 
-     void acquirePathLock(bool doingRepair) {
--        string name = ( boost::filesystem::path( dbpath ) / "mongod.lock" ).native_file_string();
-+        string name = ( boost::filesystem::path( dbpath ) / "mongod.lock" ).native();
- 
-         bool oldFile = false;
- 
-diff -ur mongodb-src-r2.0.6.orig/db/pdfile.cpp mongodb-src-r2.0.6/db/pdfile.cpp
---- mongodb-src-r2.0.6.orig/db/pdfile.cpp	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/db/pdfile.cpp	2012-07-11 14:38:50.252045472 +0200
-@@ -2093,7 +2093,7 @@
-             uniqueReservedPath( ( preserveClonedFilesOnFailure || backupOriginalFiles ) ?
-                                 "backup" : "$tmp" );
-         BOOST_CHECK_EXCEPTION( boost::filesystem::create_directory( reservedPath ) );
--        string reservedPathString = reservedPath.native_directory_string();
-+        string reservedPathString = reservedPath.native();
- 
-         bool res;
-         {
-diff -ur mongodb-src-r2.0.6.orig/dbtests/framework.cpp mongodb-src-r2.0.6/dbtests/framework.cpp
---- mongodb-src-r2.0.6.orig/dbtests/framework.cpp	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/dbtests/framework.cpp	2012-07-11 14:38:50.252045472 +0200
-@@ -281,7 +281,7 @@
-                 boost::filesystem::create_directory(p);
-             }
- 
--            string dbpathString = p.native_directory_string();
-+            string dbpathString = p.native();
-             dbpath = dbpathString.c_str();
- 
-             cmdLine.prealloc = false;
-diff -ur mongodb-src-r2.0.6.orig/shell/shell_utils.cpp mongodb-src-r2.0.6/shell/shell_utils.cpp
---- mongodb-src-r2.0.6.orig/shell/shell_utils.cpp	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/shell/shell_utils.cpp	2012-07-11 14:39:15.948711232 +0200
-@@ -388,7 +388,7 @@
- #endif
-                 }
- 
--                argv_.push_back( programPath.native_file_string() );
-+                argv_.push_back( programPath.native() );
- 
-                 port_ = -1;
- 
---- mongodb-src-r2.0.6/db/dur_journal.cpp~	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/db/dur_journal.cpp	2012-07-11 14:43:04.345369843 +0200
-@@ -169,7 +169,7 @@
+diff -dur mongodb-src-r2.2.0.orig/src/mongo/db/dur_journal.cpp mongodb-src-r2.2.0/src/mongo/db/dur_journal.cpp
+--- mongodb-src-r2.2.0.orig/src/mongo/db/dur_journal.cpp	2012-08-28 07:28:11.000000000 +0200
++++ mongodb-src-r2.2.0/src/mongo/db/dur_journal.cpp	2012-09-28 13:42:45.000000000 +0200
+@@ -176,7 +176,7 @@
                  for ( boost::filesystem::directory_iterator i( getJournalDir() );
                          i != boost::filesystem::directory_iterator();
                          ++i ) {
 -                    string fileName = boost::filesystem::path(*i).leaf();
 +                    string fileName = boost::filesystem::path(*i).filename().string();
-                     if( str::startsWith(fileName, "j._") )
+                     if( anyFiles || str::startsWith(fileName, "j._") )
                          return true;
                  }
-@@ -185,7 +185,7 @@
+@@ -194,7 +194,7 @@
                  for ( boost::filesystem::directory_iterator i( getJournalDir() );
                          i != boost::filesystem::directory_iterator();
                          ++i ) {
@@ -227,36 +66,38 @@ diff -ur mongodb-src-r2.0.6.orig/shell/shell_utils.cpp mongodb-src-r2.0.6/shell/
                      if( str::startsWith(fileName, "j._") ) {
                          try {
                              removeOldJournalFile(*i);
---- mongodb-src-r2.0.6/db/dur_recover.cpp~	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/db/dur_recover.cpp	2012-07-11 14:43:24.775369122 +0200
-@@ -71,7 +71,7 @@
-                     i != filesystem::directory_iterator();
+diff -dur mongodb-src-r2.2.0.orig/src/mongo/db/dur_recover.cpp mongodb-src-r2.2.0/src/mongo/db/dur_recover.cpp
+--- mongodb-src-r2.2.0.orig/src/mongo/db/dur_recover.cpp	2012-08-28 07:28:11.000000000 +0200
++++ mongodb-src-r2.2.0/src/mongo/db/dur_recover.cpp	2012-09-28 13:43:01.000000000 +0200
+@@ -72,7 +72,7 @@
+                     i != boost::filesystem::directory_iterator();
                      ++i ) {
-                 filesystem::path filepath = *i;
--                string fileName = filesystem::path(*i).leaf();
-+                string fileName = filesystem::path(*i).filename().string();
+                 boost::filesystem::path filepath = *i;
+-                string fileName = boost::filesystem::path(*i).leaf();
++                string fileName = boost::filesystem::path(*i).filename().string();
                  if( str::startsWith(fileName, "j._") ) {
                      unsigned u = str::toUnsigned( str::after(fileName, '_') );
                      if( m.count(u) ) {
-@@ -84,7 +84,7 @@
+@@ -85,7 +85,7 @@
                  if( i != m.begin() && m.count(i->first - 1) == 0 ) {
                      uasserted(13532,
                      str::stream() << "unexpected file in journal directory " << dir.string()
--                      << " : " << filesystem::path(i->second).leaf() << " : can't find its preceeding file");
-+                      << " : " << filesystem::path(i->second).filename().string() << " : can't find its preceeding file");
+-                      << " : " << boost::filesystem::path(i->second).leaf() << " : can't find its preceeding file");
++                      << " : " << boost::filesystem::path(i->second).filename().string() << " : can't find its preceeding file");
                  }
                  files.push_back(i->second);
              }
---- mongodb-src-r2.0.6/db/instance.cpp~	2012-07-11 14:39:59.022043046 +0200
-+++ mongodb-src-r2.0.6/db/instance.cpp	2012-07-11 14:43:51.298701519 +0200
-@@ -645,13 +645,13 @@
+diff -dur mongodb-src-r2.2.0.orig/src/mongo/db/instance.cpp mongodb-src-r2.2.0/src/mongo/db/instance.cpp
+--- mongodb-src-r2.2.0.orig/src/mongo/db/instance.cpp	2012-08-28 07:28:11.000000000 +0200
++++ mongodb-src-r2.2.0/src/mongo/db/instance.cpp	2012-09-28 13:43:18.000000000 +0200
+@@ -833,13 +833,13 @@
                  i != boost::filesystem::directory_iterator(); ++i ) {
              if ( directoryperdb ) {
                  boost::filesystem::path p = *i;
 -                string dbName = p.leaf();
 +                string dbName = p.filename().string();
                  p /= ( dbName + ".ns" );
-                 if ( MMF::exists( p ) )
+                 if ( exists( p ) )
                      names.push_back( dbName );
              }
              else {
@@ -265,9 +106,19 @@ diff -ur mongodb-src-r2.0.6.orig/shell/shell_utils.cpp mongodb-src-r2.0.6/shell/
                  if ( fileName.length() > 3 && fileName.substr( fileName.length() - 3, 3 ) == ".ns" )
                      names.push_back( fileName.substr( 0, fileName.length() - 3 ) );
              }
---- mongodb-src-r2.0.6/db/pdfile.cpp~	2012-07-11 14:39:59.022043046 +0200
-+++ mongodb-src-r2.0.6/db/pdfile.cpp	2012-07-11 14:44:07.945367599 +0200
-@@ -1987,7 +1987,7 @@
+@@ -1102,7 +1102,7 @@
+     }
+ 
+     void acquirePathLock(bool doingRepair) {
+-        string name = ( boost::filesystem::path( dbpath ) / "mongod.lock" ).native_file_string();
++        string name = ( boost::filesystem::path( dbpath ) / "mongod.lock" ).native();
+ 
+         bool oldFile = false;
+ 
+diff -dur mongodb-src-r2.2.0.orig/src/mongo/db/pdfile.cpp mongodb-src-r2.2.0/src/mongo/db/pdfile.cpp
+--- mongodb-src-r2.2.0.orig/src/mongo/db/pdfile.cpp	2012-08-28 07:28:11.000000000 +0200
++++ mongodb-src-r2.2.0/src/mongo/db/pdfile.cpp	2012-09-28 13:43:42.000000000 +0200
+@@ -1675,7 +1675,7 @@
              virtual bool apply( const Path &p ) {
                  if ( !boost::filesystem::exists( p ) )
                      return false;
@@ -276,7 +127,7 @@ diff -ur mongodb-src-r2.0.6.orig/shell/shell_utils.cpp mongodb-src-r2.0.6/shell/
                  return true;
              }
              virtual const char * op() const {
-@@ -2010,7 +2010,7 @@
+@@ -1698,7 +1698,7 @@
              virtual bool apply( const Path &p ) {
                  if ( !boost::filesystem::exists( p ) )
                      return false;
@@ -285,9 +136,127 @@ diff -ur mongodb-src-r2.0.6.orig/shell/shell_utils.cpp mongodb-src-r2.0.6/shell/
                  return true;
              }
              virtual const char * op() const {
---- mongodb-src-r2.0.6/tools/tool.cpp~	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/tools/tool.cpp	2012-07-11 14:51:25.822018820 +0200
-@@ -113,11 +113,13 @@
+@@ -1783,7 +1783,7 @@
+             uniqueReservedPath( ( preserveClonedFilesOnFailure || backupOriginalFiles ) ?
+                                 "backup" : "_tmp" );
+         MONGO_ASSERT_ON_EXCEPTION( boost::filesystem::create_directory( reservedPath ) );
+-        string reservedPathString = reservedPath.native_directory_string();
++        string reservedPathString = reservedPath.native();
+ 
+         bool res;
+         {
+diff -dur mongodb-src-r2.2.0.orig/src/mongo/dbtests/framework.cpp mongodb-src-r2.2.0/src/mongo/dbtests/framework.cpp
+--- mongodb-src-r2.2.0.orig/src/mongo/dbtests/framework.cpp	2012-08-28 07:28:11.000000000 +0200
++++ mongodb-src-r2.2.0/src/mongo/dbtests/framework.cpp	2012-09-28 13:37:59.000000000 +0200
+@@ -199,7 +199,7 @@
+                 boost::filesystem::create_directory(p);
+             }
+ 
+-            string dbpathString = p.native_directory_string();
++            string dbpathString = p.native();
+             dbpath = dbpathString.c_str();
+ 
+             cmdLine.prealloc = false;
+Only in mongodb-src-r2.2.0/src/mongo/dbtests: framework.cpp.orig
+diff -dur mongodb-src-r2.2.0.orig/src/mongo/pch.h mongodb-src-r2.2.0/src/mongo/pch.h
+--- mongodb-src-r2.2.0.orig/src/mongo/pch.h	2012-08-28 07:28:11.000000000 +0200
++++ mongodb-src-r2.2.0/src/mongo/pch.h	2012-09-28 13:38:28.000000000 +0200
+@@ -44,7 +44,7 @@
+ #include "string.h"
+ #include "limits.h"
+ 
+-#define BOOST_FILESYSTEM_VERSION 2
++#define BOOST_FILESYSTEM_VERSION 3
+ #include <boost/shared_ptr.hpp>
+ #include <boost/smart_ptr.hpp>
+ #include <boost/function.hpp>
+diff -dur mongodb-src-r2.2.0.orig/src/mongo/shell/shell_utils_launcher.cpp mongodb-src-r2.2.0/src/mongo/shell/shell_utils_launcher.cpp
+--- mongodb-src-r2.2.0.orig/src/mongo/shell/shell_utils_launcher.cpp	2012-08-28 07:28:11.000000000 +0200
++++ mongodb-src-r2.2.0/src/mongo/shell/shell_utils_launcher.cpp	2012-09-28 13:39:57.000000000 +0200
+@@ -184,7 +184,7 @@
+             }
+ #endif
+ 
+-            _argv.push_back( programPath.native_file_string() );
++            _argv.push_back( programPath.native() );
+ 
+             _port = -1;
+ 
+Only in mongodb-src-r2.2.0/src/mongo/shell: shell_utils_launcher.cpp~
+diff -dur mongodb-src-r2.2.0.orig/src/mongo/tools/restore.cpp mongodb-src-r2.2.0/src/mongo/tools/restore.cpp
+--- mongodb-src-r2.2.0.orig/src/mongo/tools/restore.cpp	2012-08-28 07:28:11.000000000 +0200
++++ mongodb-src-r2.2.0/src/mongo/tools/restore.cpp	2012-09-28 13:41:57.000000000 +0200
+@@ -174,7 +174,7 @@
+         log(2) << "drillDown: " << root.string() << endl;
+ 
+         // skip hidden files and directories
+-        if (root.leaf()[0] == '.' && root.leaf() != ".")
++        if (root.filename().string()[0] == '.' && root.filename().string() != ".")
+             return;
+ 
+         if ( is_directory( root ) ) {
+@@ -204,10 +204,10 @@
+                 }
+ 
+                 // don't insert oplog
+-                if (top_level && !use_db && p.leaf() == "oplog.bson")
++                if (top_level && !use_db && p.filename().string() == "oplog.bson")
+                     continue;
+ 
+-                if ( p.leaf() == "system.indexes.bson" ) {
++                if ( p.filename().string() == "system.indexes.bson" ) {
+                     indexes = p;
+                 } else {
+                     drillDown(p, use_db, use_coll);
+@@ -233,7 +233,7 @@
+ 
+         log() << root.string() << endl;
+ 
+-        if ( root.leaf() == "system.profile.bson" ) {
++        if ( root.filename().string() == "system.profile.bson" ) {
+             log() << "\t skipping" << endl;
+             return;
+         }
+@@ -255,7 +255,7 @@
+ 
+         verify( ns.size() );
+ 
+-        string oldCollName = root.leaf(); // Name of the collection that was dumped from
++        string oldCollName = root.filename().string(); // Name of the collection that was dumped from
+         oldCollName = oldCollName.substr( 0 , oldCollName.find_last_of( "." ) );
+         if (use_coll) {
+             ns += "." + _coll;
+@@ -267,7 +267,7 @@
+         log() << "\tgoing into namespace [" << ns << "]" << endl;
+ 
+         if ( _drop ) {
+-            if (root.leaf() != "system.users.bson" ) {
++            if (root.filename().string() != "system.users.bson" ) {
+                 log() << "\t dropping" << endl;
+                 conn().dropCollection( ns );
+             } else {
+@@ -287,7 +287,7 @@
+             if (!boost::filesystem::exists(metadataFile.string())) {
+                 // This is fine because dumps from before 2.1 won't have a metadata file, just print a warning.
+                 // System collections shouldn't have metadata so don't warn if that file is missing.
+-                if (!startsWith(metadataFile.leaf(), "system.")) {
++                if (!startsWith(metadataFile.filename().string(), "system.")) {
+                     log() << metadataFile.string() << " not found. Skipping." << endl;
+                 }
+             } else {
+@@ -317,7 +317,7 @@
+         }
+ 
+         processFile( root );
+-        if (_drop && root.leaf() == "system.users.bson") {
++        if (_drop && root.filename().string() == "system.users.bson") {
+             // Delete any users that used to exist but weren't in the dump file
+             for (set<string>::iterator it = _users.begin(); it != _users.end(); ++it) {
+                 BSONObj userMatch = BSON("user" << *it);
+diff -dur mongodb-src-r2.2.0.orig/src/mongo/tools/tool.cpp mongodb-src-r2.2.0/src/mongo/tools/tool.cpp
+--- mongodb-src-r2.2.0.orig/src/mongo/tools/tool.cpp	2012-08-28 07:28:11.000000000 +0200
++++ mongodb-src-r2.2.0/src/mongo/tools/tool.cpp	2012-09-28 13:37:59.000000000 +0200
+@@ -118,11 +118,13 @@
          // we want durability to be disabled.
          cmdLine.dur = false;
  
@@ -301,63 +270,3 @@ diff -ur mongodb-src-r2.0.6.orig/shell/shell_utils.cpp mongodb-src-r2.0.6/shell/
  
          _name = argv[0];
  
---- mongodb-src-r2.0.6/tools/restore.cpp~	2012-06-04 15:42:54.000000000 +0200
-+++ mongodb-src-r2.0.6/tools/restore.cpp	2012-07-11 14:53:11.865348411 +0200
-@@ -131,7 +131,7 @@
-         log(2) << "drillDown: " << root.string() << endl;
- 
-         // skip hidden files and directories
--        if (root.leaf()[0] == '.' && root.leaf() != ".")
-+        if (root.filename().string()[0] == '.' && root.filename().string() != ".")
-             return;
- 
-         if ( is_directory( root ) ) {
-@@ -161,10 +161,10 @@
-                 }
- 
-                 // don't insert oplog
--                if (top_level && !use_db && p.leaf() == "oplog.bson")
-+                if (top_level && !use_db && p.filename().string() == "oplog.bson")
-                     continue;
- 
--                if ( p.leaf() == "system.indexes.bson" )
-+                if ( p.filename().string() == "system.indexes.bson" )
-                     indexes = p;
-                 else
-                     drillDown(p, use_db, use_coll);
-@@ -184,7 +184,7 @@
- 
-         log() << root.string() << endl;
- 
--        if ( root.leaf() == "system.profile.bson" ) {
-+        if ( root.filename().string() == "system.profile.bson" ) {
-             log() << "\t skipping" << endl;
-             return;
-         }
-@@ -210,7 +210,7 @@
-             ns += "." + _coll;
-         }
-         else {
--            string l = root.leaf();
-+            string l = root.filename().string();
-             l = l.substr( 0 , l.find_last_of( "." ) );
-             ns += "." + l;
-         }
-@@ -218,7 +218,7 @@
-         out() << "\t going into namespace [" << ns << "]" << endl;
- 
-         if ( _drop ) {
--            if (root.leaf() != "system.users.bson" ) {
-+            if (root.filename().string() != "system.users.bson" ) {
-                 out() << "\t dropping" << endl;
-                 conn().dropCollection( ns );
-             } else {
-@@ -235,7 +235,7 @@
-         _curns = ns.c_str();
-         _curdb = NamespaceString(_curns).db;
-         processFile( root );
--        if (_drop && root.leaf() == "system.users.bson") {
-+        if (_drop && root.filename().string() == "system.users.bson") {
-             // Delete any users that used to exist but weren't in the dump file
-             for (set<string>::iterator it = _users.begin(); it != _users.end(); ++it) {
-                 BSONObj userMatch = BSON("user" << *it);

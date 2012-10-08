@@ -1,4 +1,5 @@
 /var/log/mongo/*.log {
+	olddir /var/log/archive/mongo
 	su mongod mongod
 	weekly
 	rotate 10

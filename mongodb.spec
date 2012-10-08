@@ -1,31 +1,34 @@
-# TODO: pass rpmldflags
+# TODO:
+#	- fix 'libs' subpackage (disabled due to broken 'sharedclient' build option)
+#
 Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
 Name:		mongodb
-Version:	2.0.6
-Release:	4
+Version:	2.2.0
+Release:	0.1
 License:	AGPL v3
 Group:		Applications/Databases
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
-# Source0-md5:	b3b32fecdcbe8e8068ec2989be9d2da4
+# Source0-md5:	832bdb6cc659176fd8d6b16a660ccfc6
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
-Patch0:		config.patch
+Patch0:		%{name}-cflags.patch
 Patch1:		%{name}-system-libs.patch
-Patch2:		%{name}-build.patch
-Patch3:		boost-1.50.patch
+Patch2:		boost-1.50.patch
+Patch3:		%{name}-install.patch
 URL:		http://www.mongodb.org/
 BuildRequires:	boost-devel >= 1.42
 BuildRequires:	libpcap-devel
 BuildRequires:	libstdc++-devel >= 6:4.0
 BuildRequires:	pcre-cxx-devel
-BuildRequires:	pcre-devel
+BuildRequires:	pcre-devel >= 8.30
 BuildRequires:	readline-devel
 BuildRequires:	rpmbuild(macros) >= 1.228
 BuildRequires:	scons >= 1.2
 BuildRequires:	sed >= 4.0
 BuildRequires:	snappy-devel
 BuildRequires:	v8-devel
+Requires:	%{name}-libs = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -66,7 +69,8 @@ Ten pakiet zawiera bibliotekę kliencką mongo.
 Summary:	Header files for MongoDB client library
 Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki klienckiej MongoDB
 Group:		Development/Libraries
-Requires:	%{name}-libs = %{version}-%{release}
+#Requires:	%{name}-libs = %{version}-%{release}
+Requires:	%{name}-static = %{version}-%{release}
 
 %description devel
 Mongo (from "huMONGOus") is a schema-free document-oriented database.
@@ -134,19 +138,20 @@ konfiguracji oraz skrypty init.d.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
-%{__sed} -i -e 's,-O3,%{rpmcxxflags} %{rpmcppflags},' SConstruct
 
 # Fix permissions
 find -type f -executable | xargs chmod a-x
 
 # force system pcre/js/snappy
-%{__rm} -r third_party/{js-1.7,pcre-7.4,snappy,*.py}
+%{__rm} -r src/third_party/{js-1.7,pcre-8.30,snappy,boost}
 
 %build
 %scons \
+	CPPFLAGS="%{rpmcppflags} -DXP_UNIX" \
+	--use-system-all=yes \
+	--extralib=pcrecpp,pcre,snappy \
 	--prefix=$RPM_BUILD_ROOT%{_prefix} \
-	--sharedclient \
-	--full all \
+	--full=all \
 	--usev8 \
 	--cxx=%{__cxx}
 
@@ -158,9 +163,10 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
 
 # XXX: scons is so great, recompiles everything here!
 %scons install \
+	--use-system-all=yes \
+	--extralib=pcrecpp,pcre,snappy \
 	--prefix=$RPM_BUILD_ROOT%{_prefix} \
-	--sharedclient \
-	--full \
+	--full=all \
 	--usev8 \
 	--cxx=%{__cxx}
 
@@ -229,9 +235,11 @@ fi
 %{_mandir}/man1/mongostat.1*
 %{_mandir}/man1/mongorestore.1*
 
+%if 0
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libmongoclient.so
+%endif
 
 %files devel
 %defattr(644,root,root,755)
@@ -254,5 +262,6 @@ fi
 %{_mandir}/man1/mongod.1*
 %{_mandir}/man1/mongos.1*
 %attr(755,mongod,mongod) %dir %{_var}/lib/mongo
-%attr(755,mongod,mongod) %dir %{_var}/log/mongo
+%attr(775,root,mongod) %dir %{_var}/log/mongo
+%attr(775,root,mongod) %dir %{_var}/log/archive/mongo
 %attr(640,mongod,mongod) %config(noreplace) %verify(not md5 mtime size) %{_var}/log/mongo/mongod.log

@@ -1,0 +1,12 @@
+--- mongodb-src-r2.2.0.orig/SConstruct	2012-08-28 07:28:11.000000000 +0200
++++ mongodb-src-r2.2.0/SConstruct	2012-09-28 13:17:32.000000000 +0200
+@@ -712,7 +712,8 @@
+         env.Append( CCFLAGS=["-O0", "-fstack-protector"] )
+         env['ENV']['GLIBCXX_FORCE_NEW'] = 1; # play nice with valgrind
+     else:
+-        env.Append( CCFLAGS=["-O3"] )
++        env.Append( CCFLAGS=ARGUMENTS.get("CXXFLAGS", "-O3").split() )
++        env.Append( CPPDEFINES=ARGUMENTS.get("CPPFLAGS", "").split() )
+ 
+     if debugLogging:
+         env.Append( CPPDEFINES=["_DEBUG"] );
