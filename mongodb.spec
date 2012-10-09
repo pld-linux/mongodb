@@ -28,7 +28,7 @@ BuildRequires:	scons >= 1.2
 BuildRequires:	sed >= 4.0
 BuildRequires:	snappy-devel
 BuildRequires:	v8-devel
-Requires:	%{name}-libs = %{version}-%{release}
+#Requires:	%{name}-libs = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -89,7 +89,7 @@ oprogramowania klienckiego dla MongoDB.
 Summary:	Static MongoDB client library
 Summary(pl.UTF-8):	Statyczna biblioteka kliencka MongoDB
 Group:		Development/Libraries
-Requires:	%{name}-libs = %{version}-%{release}
+#Requires:	%{name}-libs = %{version}-%{release}
 
 %description static
 Mongo (from "huMONGOus") is a schema-free document-oriented database.
