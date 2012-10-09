@@ -221,6 +221,8 @@ fi
 %attr(755,root,root) %{_bindir}/mongoexport
 %attr(755,root,root) %{_bindir}/mongofiles
 %attr(755,root,root) %{_bindir}/mongoimport
+%attr(755,root,root) %{_bindir}/mongooplog
+%attr(755,root,root) %{_bindir}/mongoperf
 %attr(755,root,root) %{_bindir}/mongorestore
 %attr(755,root,root) %{_bindir}/mongosniff
 %attr(755,root,root) %{_bindir}/mongostat
