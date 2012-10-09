@@ -17,7 +17,7 @@ Patch1:		%{name}-system-libs.patch
 Patch2:		boost-1.50.patch
 Patch3:		%{name}-install.patch
 URL:		http://www.mongodb.org/
-BuildRequires:	boost-devel >= 1.42
+BuildRequires:	boost-devel >= 1.50
 BuildRequires:	libpcap-devel
 BuildRequires:	libstdc++-devel >= 6:4.0
 BuildRequires:	pcre-cxx-devel
