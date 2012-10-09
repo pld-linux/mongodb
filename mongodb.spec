@@ -20,6 +20,9 @@ URL:		http://www.mongodb.org/
 BuildRequires:	boost-devel >= 1.50
 BuildRequires:	libpcap-devel
 BuildRequires:	libstdc++-devel >= 6:4.0
+%ifarch x86_64
+BuildRequires:	libtcmalloc-devel
+%endif
 BuildRequires:	pcre-cxx-devel
 BuildRequires:	pcre-devel >= 8.30
 BuildRequires:	readline-devel
