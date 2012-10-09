@@ -180,7 +180,7 @@ touch $RPM_BUILD_ROOT%{_var}/log/mongo/mongod.log
 
 # for some reason these are installed twice, remove unwanted copies
 for f in $RPM_BUILD_ROOT%{_includedir}/mongo/* ; do
-	rm -r "$RPM_BUILD_ROOT%{_includedir}/$(basename $f)"
+	rm -r "$RPM_BUILD_ROOT%{_includedir}/$(basename $f)" || :
 done
 
 %clean
