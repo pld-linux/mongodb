@@ -159,7 +159,7 @@ find -type f -executable | xargs chmod a-x
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
 	$RPM_BUILD_ROOT/etc/{logrotate.d,rc.d/init.d,sysconfig,mongod} \
-	$RPM_BUILD_ROOT%{_var}/{lib,log}/mongo
+	$RPM_BUILD_ROOT%{_var}/{lib,log{,/archive}}/mongo
 
 # XXX: scons is so great, recompiles everything here!
 %scons install \
