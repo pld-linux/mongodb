@@ -1,4 +1,5 @@
 # TODO:
+#	- add support for sharding server (init scripts, systemd units, sample config)
 #	- fix 'libs' subpackage (disabled due to broken 'sharedclient' build option)
 #
 Summary:	MongoDB client shell and tools
