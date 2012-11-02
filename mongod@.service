@@ -1,0 +1,14 @@
+[Unit]
+Description=the Mongo Daemon, '%i' instance
+After=syslog.target network.target
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/sysconfig/mongod
+ExecStartPre=/bin/sh -c "if grep -q '^[ \t]*fork\>' /etc/mongod/%i.conf ; then echo there must be no 'fork' in /etc/mongod/%i.conf >&2 ; exit 1 ; fi"
+ExecStart=/usr/bin/mongod --config /etc/mongod/%i.conf
+User=mongod
+Group=mongod
+
+[Install]
+Alias=multi-user.target.wants/mongod@default.service

@@ -5,7 +5,7 @@ Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
 Name:		mongodb
 Version:	2.2.0
-Release:	1
+Release:	1.1
 License:	AGPL v3
 Group:		Applications/Databases
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
@@ -13,6 +13,7 @@ Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
 Source3:	mongod-default.conf
+Source4:	mongod@.service
 Patch0:		%{name}-cflags.patch
 Patch1:		%{name}-system-libs.patch
 Patch2:		boost-1.50.patch
@@ -27,7 +28,7 @@ BuildRequires:	libtcmalloc-devel
 BuildRequires:	pcre-cxx-devel
 BuildRequires:	pcre-devel >= 8.30
 BuildRequires:	readline-devel
-BuildRequires:	rpmbuild(macros) >= 1.228
+BuildRequires:	rpmbuild(macros) >= 1.644
 BuildRequires:	scons >= 1.2
 BuildRequires:	sed >= 4.0
 BuildRequires:	snappy-devel
@@ -111,6 +112,7 @@ Summary:	MongoDB server, sharding server, and support scripts
 Summary(pl.UTF-8):	Serwer MongoDB, serwer dzielący oraz skrypty pomocnicze
 Group:		Applications/Databases
 Requires:	%{name} = %{version}-%{release}
+Requires:	systemd-units >= 38
 Requires(post,preun):	/sbin/chkconfig
 Requires(postun):	/usr/sbin/groupdel
 Requires(postun):	/usr/sbin/userdel
@@ -163,7 +165,8 @@ find -type f -executable | xargs chmod a-x
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
 	$RPM_BUILD_ROOT/etc/{logrotate.d,rc.d/init.d,sysconfig,mongod} \
-	$RPM_BUILD_ROOT%{_var}/{lib,log{,/archive}}/mongo
+	$RPM_BUILD_ROOT%{_var}/{lib,log{,/archive}}/mongo \
+	$RPM_BUILD_ROOT%{systemdunitdir}
 
 # XXX: scons is so great, recompiles everything here!
 %scons install \
@@ -179,6 +182,10 @@ install -p %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/mongod
 cp -p rpm/mongod.sysconfig $RPM_BUILD_ROOT/etc/sysconfig/mongod
 install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/mongod/default.conf
 cp -p debian/*.1 $RPM_BUILD_ROOT%{_mandir}/man1
+
+# mask out the LSB service
+ln -s /dev/null $RPM_BUILD_ROOT%{systemdunitdir}/mongod.service
+install %{SOURCE4} $RPM_BUILD_ROOT%{systemdunitdir}/mongod@.service
 
 touch $RPM_BUILD_ROOT%{_var}/log/mongo/mongod.log
 
@@ -200,11 +207,23 @@ rm -rf $RPM_BUILD_ROOT
 %post server
 /sbin/chkconfig --add mongod
 %service mongod restart
+# our systemd macros cannot handle template (multi-instance) units yet
+export SYSTEMD_LOG_LEVEL=warning SYSTEMD_LOG_TARGET=syslog
+/bin/systemd_booted && /bin/systemctl --quiet daemon-reload || :
+if [ $1 -eq 1 ]; then
+	/bin/systemctl --quiet enable mongod@.service || : 
+	/bin/systemd_booted && echo 'Run "/bin/systemctl start mongod@default.service" to start mongod.' || :
+else
+	/bin/systemd_booted && /bin/systemctl --quiet try-restart mongod@default.service || :
+fi
 
 %preun server
 if [ "$1" = "0" ]; then
 	%service -q mongod stop
 	/sbin/chkconfig --del mongod
+	export SYSTEMD_LOG_LEVEL=warning SYSTEMD_LOG_TARGET=syslog
+	/bin/systemd_booted && /bin/systemctl --quiet stop mongod@default.service || :
+	/bin/systemctl --quiet disable mongod@.service || :
 fi
 
 %postun server
@@ -212,6 +231,7 @@ if [ "$1" = "0" ]; then
 	%userremove mongod
 	%groupremove mongod
 fi
+%systemd_reload
 
 %triggerpostun server -- %{name}-server < 2.0.6-3
 if [ -f %{_sysconfdir}/mongod.conf.rpmsave ] ; then
@@ -276,3 +296,5 @@ fi
 %attr(775,root,mongod) %dir %{_var}/log/mongo
 %attr(775,root,mongod) %dir %{_var}/log/archive/mongo
 %attr(640,mongod,mongod) %config(noreplace) %verify(not md5 mtime size) %{_var}/log/mongo/mongod.log
+%{systemdunitdir}/mongod.service
+%{systemdunitdir}/mongod@.service
