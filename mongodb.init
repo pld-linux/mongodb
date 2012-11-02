@@ -64,7 +64,7 @@ start() {
 			pidfile="${MONGOD_PIDFILE%.pid}-$instance.log"
 		fi
 		daemon --pidfile "$pidfile" --user $MONGOD_USER \
-			$MONGOD_BIN --config "$config" run
+			$MONGOD_BIN --config "$config" --fork
 		[ $? -eq 0 ] && started=$(($started + 1))
 	done
 	# at least one started - the service is running

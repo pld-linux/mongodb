@@ -12,6 +12,7 @@ Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
 # Source0-md5:	832bdb6cc659176fd8d6b16a660ccfc6
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
+Source3:	mongod-default.conf
 Patch0:		%{name}-cflags.patch
 Patch1:		%{name}-system-libs.patch
 Patch2:		boost-1.50.patch
@@ -176,7 +177,7 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
 cp -p %{SOURCE1} $RPM_BUILD_ROOT/etc/logrotate.d/mongod
 install -p %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/mongod
 cp -p rpm/mongod.sysconfig $RPM_BUILD_ROOT/etc/sysconfig/mongod
-cp -p rpm/mongod.conf $RPM_BUILD_ROOT%{_sysconfdir}/mongod/default.conf
+install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/mongod/default.conf
 cp -p debian/*.1 $RPM_BUILD_ROOT%{_mandir}/man1
 
 touch $RPM_BUILD_ROOT%{_var}/log/mongo/mongod.log
