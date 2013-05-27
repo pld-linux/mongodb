@@ -1,5 +1,5 @@
-/var/log/mongo/*.log {
-	olddir /var/log/archive/mongo
+/var/log/mongodb/*.log {
+	olddir /var/log/archive/mongodb
 	su mongod mongod
 	weekly
 	rotate 10
@@ -9,5 +9,3 @@
 	notifempty
 	missingok
 }
-
-
