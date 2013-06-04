@@ -4,12 +4,12 @@
 Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
 Name:		mongodb
-Version:	2.2.2
+Version:	2.2.4
 Release:	1
 License:	AGPL v3
 Group:		Applications/Databases
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
-# Source0-md5:	697c448271358545a8a40a973f88edf4
+# Source0-md5:	033354c543c053f5d539b573ac8c28b0
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
 Source3:	mongod-default.conf
@@ -23,7 +23,7 @@ URL:		http://www.mongodb.org/
 BuildRequires:	boost-devel >= 1.50
 BuildRequires:	libpcap-devel
 BuildRequires:	libstdc++-devel >= 6:4.0
-%ifarch x86_64
+%ifarch %{x8664}
 BuildRequires:	libtcmalloc-devel
 %endif
 BuildRequires:	pcre-cxx-devel
@@ -167,7 +167,7 @@ find -type f -executable | xargs chmod a-x
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
 	$RPM_BUILD_ROOT/etc/{logrotate.d,rc.d/init.d,sysconfig,mongod} \
-	$RPM_BUILD_ROOT%{_var}/{lib,log{,/archive}}/mongo \
+	$RPM_BUILD_ROOT%{_var}/{lib,log{,/archive}}/mongodb \
 	$RPM_BUILD_ROOT%{systemdunitdir}
 
 # XXX: scons is so great, recompiles everything here!
@@ -184,17 +184,17 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
 cp -p %{SOURCE1} $RPM_BUILD_ROOT/etc/logrotate.d/mongod
 install -p %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/mongod
 cp -p rpm/mongod.sysconfig $RPM_BUILD_ROOT/etc/sysconfig/mongod
-install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/mongod/default.conf
+cp -p %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/mongod/default.conf
 cp -p debian/*.1 $RPM_BUILD_ROOT%{_mandir}/man1
 
 # mask out the LSB service
 ln -s /dev/null $RPM_BUILD_ROOT%{systemdunitdir}/mongod.service
-install %{SOURCE4} $RPM_BUILD_ROOT%{systemdunitdir}/mongod@.service
+cp -p %{SOURCE4} $RPM_BUILD_ROOT%{systemdunitdir}/mongod@.service
 
-touch $RPM_BUILD_ROOT%{_var}/log/mongo/mongod.log
+touch $RPM_BUILD_ROOT%{_var}/log/mongodb/mongod.log
 
 # for some reason these are installed twice, remove unwanted copies
-for f in $RPM_BUILD_ROOT%{_includedir}/mongo/* ; do
+for f in $RPM_BUILD_ROOT%{_includedir}/mongo/*; do
 	rm -r "$RPM_BUILD_ROOT%{_includedir}/$(basename $f)" || :
 done
 
@@ -206,7 +206,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %pre server
 %groupadd -g 258 -r mongod
-%useradd -u 258 -r -g mongod -d %{_var}/lib/mongo -s /bin/false -c "MongoDB Database Server" mongod
+%useradd -u 258 -r -g mongod -d %{_var}/lib/mongodb -s /bin/false -c "MongoDB Database Server" mongod
 
 %post server
 /sbin/chkconfig --add mongod
@@ -284,19 +284,18 @@ fi
 
 %files server
 %defattr(644,root,root,755)
-#%dir %{_sysconfdir}
 %dir %{_sysconfdir}/mongod
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/mongod/default.conf
 %attr(754,root,root) /etc/rc.d/init.d/mongod
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/mongod
 %config(noreplace) /etc/logrotate.d/mongod
+%{systemdunitdir}/mongod.service
+%{systemdunitdir}/mongod@.service
 %attr(755,root,root) %{_bindir}/mongod
 %attr(755,root,root) %{_bindir}/mongos
 %{_mandir}/man1/mongod.1*
 %{_mandir}/man1/mongos.1*
-%attr(755,mongod,mongod) %dir %{_var}/lib/mongo
-%attr(775,root,mongod) %dir %{_var}/log/mongo
-%attr(775,root,mongod) %dir %{_var}/log/archive/mongo
-%attr(640,mongod,mongod) %config(noreplace) %verify(not md5 mtime size) %{_var}/log/mongo/mongod.log
-%{systemdunitdir}/mongod.service
-%{systemdunitdir}/mongod@.service
+%attr(755,mongod,mongod) %dir %{_var}/lib/mongodb
+%attr(775,root,mongod) %dir %{_var}/log/mongodb
+%attr(775,root,mongod) %dir %{_var}/log/archive/mongodb
+%attr(640,mongod,mongod) %config(noreplace) %verify(not md5 mtime size) %{_var}/log/mongodb/mongod.log
