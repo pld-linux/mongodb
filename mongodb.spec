@@ -1,6 +1,5 @@
 # TODO:
 #	- add support for sharding server (init scripts, systemd units, sample config)
-#	- fix 'libs' subpackage (disabled due to broken 'sharedclient' build option)
 #
 Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
@@ -19,6 +18,7 @@ Patch0:		%{name}-cflags.patch
 Patch1:		%{name}-system-libs.patch
 Patch2:		boost-1.50.patch
 Patch3:		%{name}-install.patch
+Patch4:		%{name}-shared.patch
 URL:		http://www.mongodb.org/
 BuildRequires:	boost-devel >= 1.50
 BuildRequires:	libpcap-devel
@@ -34,7 +34,7 @@ BuildRequires:	scons >= 1.2
 BuildRequires:	sed >= 4.0
 BuildRequires:	snappy-devel
 BuildRequires:	v8-devel
-#Requires:	%{name}-libs = %{version}-%{release}
+Requires:	%{name}-libs = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -75,8 +75,7 @@ Ten pakiet zawiera bibliotekę kliencką mongo.
 Summary:	Header files for MongoDB client library
 Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki klienckiej MongoDB
 Group:		Development/Libraries
-#Requires:	%{name}-libs = %{version}-%{release}
-Requires:	%{name}-static = %{version}-%{release}
+Requires:	%{name}-libs = %{version}-%{release}
 
 %description devel
 Mongo (from "huMONGOus") is a schema-free document-oriented database.
@@ -95,7 +94,7 @@ oprogramowania klienckiego dla MongoDB.
 Summary:	Static MongoDB client library
 Summary(pl.UTF-8):	Statyczna biblioteka kliencka MongoDB
 Group:		Development/Libraries
-#Requires:	%{name}-libs = %{version}-%{release}
+Requires:	%{name}-devel = %{version}-%{release}
 
 %description static
 Mongo (from "huMONGOus") is a schema-free document-oriented database.
@@ -145,6 +144,7 @@ konfiguracji oraz skrypty init.d.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 # Fix permissions
 find -type f -executable | xargs chmod a-x
@@ -159,6 +159,7 @@ find -type f -executable | xargs chmod a-x
 	--extralib=pcrecpp,pcre,snappy \
 	--prefix=$RPM_BUILD_ROOT%{_prefix} \
 	--full=all \
+	--sharedclient \
 	--usev8 \
 	--cxx=%{__cxx}
 
@@ -171,10 +172,12 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
 
 # XXX: scons is so great, recompiles everything here!
 %scons install \
+	CPPFLAGS="%{rpmcppflags} -DXP_UNIX" \
 	--use-system-all=yes \
 	--extralib=pcrecpp,pcre,snappy \
 	--prefix=$RPM_BUILD_ROOT%{_prefix} \
 	--full=all \
+	--sharedclient \
 	--usev8 \
 	--cxx=%{__cxx}
 
@@ -267,11 +270,9 @@ fi
 %{_mandir}/man1/mongostat.1*
 %{_mandir}/man1/mongorestore.1*
 
-%if 0
 %files libs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libmongoclient.so
-%endif
 
 %files devel
 %defattr(644,root,root,755)

@@ -1,0 +1,11 @@
+--- mongodb-src-r2.2.2/src/SConscript.client.orig	2013-06-03 21:41:59.001480588 +0200
++++ mongodb-src-r2.2.2/src/SConscript.client	2013-06-04 15:51:40.623451163 +0200
+@@ -98,7 +98,7 @@
+ mongoclient_lib = env.Library('mongoclient', clientSource),
+ mongoclient_install = env.Install('#/', [
+         mongoclient_lib,
+-        #env.SharedLibrary('mongoclient', clientSource),
++        env.SharedLibrary('mongoclient', clientSource),
+         ])
+ env.Alias('mongoclient', mongoclient_install)
+ 
