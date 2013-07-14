@@ -198,6 +198,11 @@ for f in $RPM_BUILD_ROOT%{_includedir}/mongo/*; do
 	rm -r "$RPM_BUILD_ROOT%{_includedir}/$(basename $f)" || :
 done
 
+%ifarch %{x8664}
+chmod -R a+rX $RPM_BUILD_ROOT/usr/lib
+%{__rm} -r $RPM_BUILD_ROOT/usr/lib
+%endif
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
