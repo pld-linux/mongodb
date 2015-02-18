@@ -19,6 +19,7 @@ Patch1:		%{name}-system-libs.patch
 Patch2:		boost-1.50.patch
 Patch3:		%{name}-install.patch
 Patch4:		%{name}-shared.patch
+Patch5:		gcc4.patch
 URL:		http://www.mongodb.org/
 BuildRequires:	boost-devel >= 1.50
 BuildRequires:	libpcap-devel
@@ -145,6 +146,7 @@ konfiguracji oraz skrypty init.d.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
 
 # Fix permissions
 find -type f -executable | xargs chmod a-x
