@@ -36,6 +36,8 @@ BuildRequires:	sed >= 4.0
 BuildRequires:	snappy-devel
 BuildRequires:	v8-devel
 Requires:	%{name}-libs = %{version}-%{release}
+# matching v8-devel
+ExclusiveArch:	%{ix86} %{x8664} arm mips
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
