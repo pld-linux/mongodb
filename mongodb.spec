@@ -1,5 +1,8 @@
 # TODO:
 #	- add support for sharding server (init scripts, systemd units, sample config)
+#   - \> escape not liked?
+#  Sep 11 00:20:18 blodnatt systemd[1]: [/lib/systemd/system/mongod@.service:8] Invalid escape sequences in command line: "/bin/sh -c "if grep -q '^[ \t]*fork\>' /etc/mongod/%i.conf ; then echo there must be no 'fork' in /etc/mongod/%i.conf >&2 ; exit 1 ; fi""
+# TODO
 #
 Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
