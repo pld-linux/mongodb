@@ -7,12 +7,12 @@
 Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
 Name:		mongodb
-Version:	2.2.4
-Release:	8
+Version:	2.6.12
+Release:	0.1
 License:	AGPL v3
 Group:		Applications/Databases
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
-# Source0-md5:	033354c543c053f5d539b573ac8c28b0
+# Source0-md5:	d0d193f864e04df9366b2d4338bd62d2
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
 Source3:	mongod-default.conf
@@ -148,16 +148,16 @@ konfiguracji oraz skrypty init.d.
 %setup -q -n %{name}-src-r%{version}
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
+#%patch2 -p1
+#%patch3 -p1
+#%patch4 -p1
 %patch5 -p1
 
 # Fix permissions
 find -type f -executable | xargs chmod a-x
 
 # force system pcre/js/snappy
-%{__rm} -r src/third_party/{js-1.7,pcre-8.30,snappy,boost}
+%{__rm} -r src/third_party/{pcre-8.30,snappy,boost}
 
 %build
 %scons \

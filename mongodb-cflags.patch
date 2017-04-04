@@ -1,12 +1,12 @@
---- mongodb-src-r2.2.0.orig/SConstruct	2012-08-28 07:28:11.000000000 +0200
-+++ mongodb-src-r2.2.0/SConstruct	2012-09-28 13:17:32.000000000 +0200
-@@ -712,7 +712,8 @@
-         env.Append( CCFLAGS=["-O0", "-fstack-protector"] )
-         env['ENV']['GLIBCXX_FORCE_NEW'] = 1; # play nice with valgrind
-     else:
+--- mongodb-src-r2.6.12/SConstruct~	2016-03-21 18:09:46.000000000 +0200
++++ mongodb-src-r2.6.12/SConstruct	2017-04-04 11:01:42.056852157 +0300
+@@ -879,7 +879,8 @@
+         env.Append( LINKFLAGS=" -fprofile-arcs -ftest-coverage " )
+ 
+     if optBuild:
 -        env.Append( CCFLAGS=["-O3"] )
 +        env.Append( CCFLAGS=ARGUMENTS.get("CXXFLAGS", "-O3").split() )
 +        env.Append( CPPDEFINES=ARGUMENTS.get("CPPFLAGS", "").split() )
+     else:
+         env.Append( CCFLAGS=["-O0"] )
  
-     if debugLogging:
-         env.Append( CPPDEFINES=["_DEBUG"] );

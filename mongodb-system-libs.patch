@@ -1,35 +1,11 @@
---- mongodb-src-r2.2.0.orig/src/mongo/util/compress.cpp	2012-08-28 07:28:11.000000000 +0200
-+++ mongodb-src-r2.2.0/src/mongo/util/compress.cpp	2012-09-28 14:07:08.000000000 +0200
-@@ -2,7 +2,7 @@
+--- mongodb-src-r2.6.12/src/mongo/util/compress.cpp~	2016-03-21 18:09:46.000000000 +0200
++++ mongodb-src-r2.6.12/src/mongo/util/compress.cpp	2017-04-04 11:02:36.062842963 +0300
+@@ -30,7 +30,7 @@
  
  #include "mongo/util/compress.h"
  
--#include "third_party/snappy/snappy.h"
+-#include "snappy.h"
 +#include <snappy.h>
  
  namespace mongo {
- 
-diff -dur mongodb-src-r2.2.0.orig/src/mongo/scripting/engine_spidermonkey.cpp mongodb-src-r2.2.0/src/mongo/scripting/engine_spidermonkey.cpp
---- mongodb-src-r2.2.0.orig/src/mongo/scripting/engine_spidermonkey.cpp	2012-08-28 07:28:11.000000000 +0200
-+++ mongodb-src-r2.2.0/src/mongo/scripting/engine_spidermonkey.cpp	2012-10-08 12:27:07.000000000 +0200
-@@ -25,7 +25,7 @@
- #include <boost/date_time/posix_time/posix_time.hpp>
- #endif
- 
--#include <third_party/js-1.7/jsdate.h>
-+#include <js/jsdate.h>
- 
- #include "mongo/util/mongoutils/str.h"
- 
-diff -dur mongodb-src-r2.2.0.orig/src/mongo/scripting/engine_spidermonkey.h mongodb-src-r2.2.0/src/mongo/scripting/engine_spidermonkey.h
---- mongodb-src-r2.2.0.orig/src/mongo/scripting/engine_spidermonkey.h	2012-08-28 07:28:11.000000000 +0200
-+++ mongodb-src-r2.2.0/src/mongo/scripting/engine_spidermonkey.h	2012-10-08 12:27:55.000000000 +0200
-@@ -29,7 +29,7 @@
- #define JS_PUBLIC_DATA(t)   t
- #endif
- 
--#include <third_party/js-1.7/jsapi.h>
-+#include <js/jsapi.h>
- 
- // END inc hacking
  
