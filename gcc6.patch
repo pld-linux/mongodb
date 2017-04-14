@@ -1,0 +1,68 @@
+--- mongodb-src-r2.2.4/src/mongo/util/concurrency/threadlocal.h~	2013-04-01 04:41:49.000000000 +0200
++++ mongodb-src-r2.2.4/src/mongo/util/concurrency/threadlocal.h	2017-04-14 17:05:17.819748109 +0200
+@@ -16,10 +16,10 @@
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
+-#include "mongo/client/undef_macros.h"
++//#include "mongo/client/undef_macros.h"
+ #include <boost/thread/tss.hpp>
+ #include <boost/bind.hpp>
+-#include "mongo/client/redef_macros.h"
++//#include "mongo/client/redef_macros.h"
+ 
+ 
+ namespace mongo { 
+--- mongodb-src-r2.2.4/src/mongo/db/queryoptimizer.h~	2013-04-01 04:41:49.000000000 +0200
++++ mongodb-src-r2.2.4/src/mongo/db/queryoptimizer.h	2017-04-14 17:12:49.282347360 +0200
+@@ -170,7 +170,7 @@
+         _keyFieldsOnly( queryPlan.keyFieldsOnly() ),
+         _scanAndOrderRequired( queryPlan.scanAndOrderRequired() ) {
+         }
+-        bool valid() const { return _fieldRangeSetMulti; }
++        bool valid() const { return _fieldRangeSetMulti != NULL; }
+         shared_ptr<FieldRangeSet> _fieldRangeSetMulti;
+         shared_ptr<Projection::KeyOnly> _keyFieldsOnly;
+         bool _scanAndOrderRequired;
+--- mongodb-src-r2.2.4/src/mongo/db/queryoptimizer.cpp~	2013-04-01 04:41:49.000000000 +0200
++++ mongodb-src-r2.2.4/src/mongo/db/queryoptimizer.cpp	2017-04-14 17:22:59.293485280 +0200
+@@ -1419,7 +1419,7 @@
+             if ( _explainPlanInfo ) {
+                 _explainPlanInfo.reset( new ExplainPlanInfo() );
+                 _explainPlanInfo->notePlan( *_c, _queryPlan->scanAndOrderRequired(),
+-                                           _queryPlan->keyFieldsOnly() );
++                                           _queryPlan->keyFieldsOnly() != NULL );
+                 shared_ptr<ExplainClauseInfo> clauseInfo( new ExplainClauseInfo() );
+                 clauseInfo->addPlanInfo( _explainPlanInfo );
+                 _mps->addClauseInfo( clauseInfo );
+--- mongodb-src-r2.2.4/src/mongo/db/queryoptimizercursorimpl.cpp~	2013-04-01 04:41:49.000000000 +0200
++++ mongodb-src-r2.2.4/src/mongo/db/queryoptimizercursorimpl.cpp	2017-04-14 17:24:01.807612099 +0200
+@@ -96,7 +96,7 @@
+             // The query plan must have a matcher.  The matcher's constructor performs some aspects
+             // of query validation that should occur as part of this class's init() if not handled
+             // already.
+-            fassert( 16249, queryPlan().matcher() );
++            fassert( 16249, queryPlan().matcher() != NULL );
+ 
+             // All candidate cursors must support yields for QueryOptimizerCursorImpl's
+             // prepareToYield() and prepareToTouchEarlierIterate() to work.
+@@ -221,7 +221,7 @@
+             }
+             _explainPlanInfo.reset( new ExplainPlanInfo() );
+             _explainPlanInfo->notePlan( *_c, queryPlan().scanAndOrderRequired(),
+-                                        queryPlan().keyFieldsOnly() );
++                                        queryPlan().keyFieldsOnly() != NULL );
+             return _explainPlanInfo;
+         }
+         shared_ptr<ExplainPlanInfo> explainInfo() const { return _explainPlanInfo; }
+--- mongodb-src-r2.2.4/src/mongo/db/ops/query.cpp~	2013-04-01 04:41:49.000000000 +0200
++++ mongodb-src-r2.2.4/src/mongo/db/ops/query.cpp	2017-04-14 17:25:35.475055105 +0200
+@@ -584,7 +584,7 @@
+         shared_ptr<ExplainRecordingStrategy> ret
+         ( new SimpleCursorExplainStrategy( ancillaryInfo, _cursor ) );
+         ret->notePlan( queryPlan.valid() && queryPlan._scanAndOrderRequired,
+-                      queryPlan._keyFieldsOnly );
++                      queryPlan._keyFieldsOnly != NULL );
+         return ret;
+     }
+ 
