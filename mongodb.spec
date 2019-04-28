@@ -7,24 +7,21 @@
 Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
 Name:		mongodb
-Version:	2.2.4
-Release:	9
+Version:	4.0.5
+Release:	1
 License:	AGPL v3
 Group:		Applications/Databases
-Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
-# Source0-md5:	033354c543c053f5d539b573ac8c28b0
+#Source0Download: https://www.mongodb.com/download-center/community
+Source0:	https://fastdl.mongodb.org/src/%{name}-src-r%{version}.tar.gz
+# Source0-md5:	091b73764d0d88cfcc91f397efd362e5
 Source1:	%{name}.logrotate
 Source2:	%{name}.init
 Source3:	mongod-default.conf
 Source4:	mongod@.service
 Patch0:		%{name}-cflags.patch
-Patch1:		%{name}-system-libs.patch
-Patch2:		boost-1.50.patch
-Patch3:		%{name}-install.patch
-Patch4:		%{name}-shared.patch
-Patch5:		gcc4.patch
-Patch6:		no-Werror.patch
-Patch7:		gcc6.patch
+Patch1:		%{name}-pld.patch
+#Patch6:		no-Werror.patch
+#Patch7:		gcc6.patch
 URL:		http://www.mongodb.org/
 BuildRequires:	boost-devel >= 1.50
 BuildRequires:	libpcap-devel
@@ -32,11 +29,12 @@ BuildRequires:	libstdc++-devel >= 6:4.0
 %ifarch %{x8664}
 BuildRequires:	libtcmalloc-devel
 %endif
+#BuildRequires:	mozjs45-devel
 BuildRequires:	pcre-cxx-devel
 BuildRequires:	pcre-devel >= 8.30
 BuildRequires:	readline-devel
 BuildRequires:	rpmbuild(macros) >= 1.644
-BuildRequires:	scons >= 1.2
+BuildRequires:	scons >= 2.5
 BuildRequires:	sed >= 4.0
 BuildRequires:	snappy-devel
 BuildRequires:	v8-devel
@@ -150,29 +148,29 @@ konfiguracji oraz skrypty init.d.
 %setup -q -n %{name}-src-r%{version}
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
 
 # Fix permissions
 find -type f -executable | xargs chmod a-x
 
 # force system pcre/js/snappy
-%{__rm} -r src/third_party/{js-1.7,pcre-8.30,snappy,boost}
+%{__rm} -r src/third_party/{asio-master,boost-1.60.0,gperftools-2.5,icu4c-57.1,libstemmer_c,mozjs-45,pcre-8.41,scons-2.5.0,snappy-1.1.3,sqlite-amalgamation-3190300,tomcrypt-1.18.1,valgrind-3.11.0,yaml-cpp-0.5.3,zlib-1.2.11}
 
 %build
+# wiredtiger requires 64-bit platform
 %scons \
-	CPPFLAGS="%{rpmcppflags} -DXP_UNIX" \
-	--use-system-all=yes \
-	--extralib=pcrecpp,pcre,snappy \
+	CCFLAGS="%{rpmcflags}" \
+	CPPDEFINES="%{rpmcppflags}" \
 	--prefix=$RPM_BUILD_ROOT%{_prefix} \
+	--cxx=%{__cxx} \
+	--disable-warnings-as-errors \
+	--extralib=pcrecpp,pcre,snappy \
 	--full=all \
 	--sharedclient \
+	--use-system-all=yes \
 	--usev8 \
-	--cxx=%{__cxx}
+%ifnarch %{x8664}
+	--wiredtiger=off
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -183,14 +181,19 @@ install -d $RPM_BUILD_ROOT{%{_sysconfdir},%{_mandir}/man1} \
 
 # XXX: scons is so great, recompiles everything here!
 %scons install \
-	CPPFLAGS="%{rpmcppflags} -DXP_UNIX" \
-	--use-system-all=yes \
-	--extralib=pcrecpp,pcre,snappy \
+	CCFLAGS="%{rpmcflags}" \
+	CPPDEFINES="%{rpmcppflags}" \
 	--prefix=$RPM_BUILD_ROOT%{_prefix} \
+	--cxx=%{__cxx} \
+	--disable-warnings-as-errors \
+	--extralib=pcrecpp,pcre,snappy \
 	--full=all \
 	--sharedclient \
+	--use-system-all=yes \
 	--usev8 \
-	--cxx=%{__cxx}
+%ifnarch %{x8664}
+	--wiredtiger=off
+%endif
 
 cp -p %{SOURCE1} $RPM_BUILD_ROOT/etc/logrotate.d/mongod
 install -p %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/mongod

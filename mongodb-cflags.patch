@@ -1,12 +1,15 @@
---- mongodb-src-r2.2.0.orig/SConstruct	2012-08-28 07:28:11.000000000 +0200
-+++ mongodb-src-r2.2.0/SConstruct	2012-09-28 13:17:32.000000000 +0200
-@@ -712,7 +712,8 @@
-         env.Append( CCFLAGS=["-O0", "-fstack-protector"] )
-         env['ENV']['GLIBCXX_FORCE_NEW'] = 1; # play nice with valgrind
-     else:
--        env.Append( CCFLAGS=["-O3"] )
-+        env.Append( CCFLAGS=ARGUMENTS.get("CXXFLAGS", "-O3").split() )
-+        env.Append( CPPDEFINES=ARGUMENTS.get("CPPFLAGS", "").split() )
+--- mongodb-src-r4.0.5/SConstruct.orig	2018-12-31 09:58:59.358465265 +0100
++++ mongodb-src-r4.0.5/SConstruct	2018-12-31 10:36:23.448439637 +0100
+@@ -1820,12 +1820,6 @@
+         env.Append( CCFLAGS=["-fprofile-arcs", "-ftest-coverage"] )
+         env.Append( LINKFLAGS=["-fprofile-arcs", "-ftest-coverage"] )
  
-     if debugLogging:
-         env.Append( CPPDEFINES=["_DEBUG"] );
+-    if optBuild and not optBuildForSize:
+-        env.Append( CCFLAGS=["-O2"] )
+-    elif optBuild and optBuildForSize: 
+-        env.Append( CCFLAGS=["-Os"] )
+-    else:
+-        env.Append( CCFLAGS=["-O0"] )
+ 
+     # Promote linker warnings into errors. We can't yet do this on OS X because its linker considers
+     # noall_load obsolete and warns about it.
