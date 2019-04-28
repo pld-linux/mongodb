@@ -1,0 +1,13 @@
+--- mongodb-src-r4.0.5/SConstruct.orig	2018-12-31 17:39:53.664816167 +0100
++++ mongodb-src-r4.0.5/SConstruct	2018-12-31 17:45:28.924812337 +0100
+@@ -840,6 +840,10 @@
+     help='Sets the path to the openssl binaries for packaging',
+     default='c:/openssl/bin')
+ 
++# for PLD %scons macro compatibility
++for var in ['CPPFLAGS', 'FFLAGS', 'LDFLAGS', 'prefix', 'libsuffix']:
++    env_vars.Add(var)
++
+ # -- Validate user provided options --
+ 
+ # A dummy environment that should *only* have the variables we have set. In practice it has
