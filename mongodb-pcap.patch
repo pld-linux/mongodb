@@ -1,0 +1,35 @@
+#--- mongodb-src-r2.2.4/src/mongo/util/net/sock.h.orig	2013-04-01 04:41:49.000000000 +0200
+#+++ mongodb-src-r2.2.4/src/mongo/util/net/sock.h	2019-04-28 20:26:20.537526400 +0200
+#@@ -59,8 +59,6 @@
+# #else // _WIN32
+# 
+#     inline void closesocket(int s) { close(s); }
+#-    const int INVALID_SOCKET = -1;
+#-    typedef int SOCKET;
+# 
+# #endif // _WIN32
+# 
+#--- mongodb-src-r2.2.4/src/mongo/util/net/sock.cpp.orig	2013-04-01 04:41:49.000000000 +0200
+#+++ mongodb-src-r2.2.4/src/mongo/util/net/sock.cpp	2019-04-28 20:26:36.338355487 +0200
+#@@ -578,7 +578,7 @@
+#         _remote = remote;
+# 
+#         _fd = socket(remote.getType(), SOCK_STREAM, 0);
+#-        if ( _fd == INVALID_SOCKET ) {
+#+        if ( _fd == -1 ) {
+#             LOG(_logLevel) << "ERROR: connect invalid socket " << errnoWithDescription() << endl;
+#             return false;
+#         }
+--- mongodb-src-r2.2.4/src/mongo/util/net/sock.h.orig	2019-04-28 20:27:19.950643872 +0200
++++ mongodb-src-r2.2.4/src/mongo/util/net/sock.h	2019-04-28 20:36:33.543024811 +0200
+@@ -39,6 +39,10 @@
+ #include <openssl/ssl.h>
+ #endif
+ 
++// in case it's defined in some (e.g. pcap) headers
++#undef SOCKET
++#undef INVALID_SOCKET
++
+ namespace mongo {
+ 
+     const int SOCK_FAMILY_UNKNOWN_ERROR=13078;
