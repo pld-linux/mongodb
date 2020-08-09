@@ -8,7 +8,7 @@ Summary:	MongoDB client shell and tools
 Summary(pl.UTF-8):	Powłoka kliencka i narzędzia dla bazy danych MongoDB
 Name:		mongodb
 Version:	2.2.4
-Release:	11
+Release:	12
 License:	AGPL v3
 Group:		Applications/Databases
 Source0:	http://downloads.mongodb.org/src/%{name}-src-r%{version}.tar.gz
@@ -26,6 +26,7 @@ Patch5:		gcc4.patch
 Patch6:		no-Werror.patch
 Patch7:		gcc6.patch
 Patch8:		%{name}-pcap.patch
+Patch9:		boost-1.73.patch
 URL:		http://www.mongodb.org/
 BuildRequires:	boost-devel >= 1.50
 BuildRequires:	libpcap-devel
@@ -158,6 +159,7 @@ konfiguracji oraz skrypty init.d.
 %patch6 -p1
 %patch7 -p1
 %patch8 -p1
+%patch9 -p1
 
 # Fix permissions
 find -type f -executable | xargs chmod a-x
