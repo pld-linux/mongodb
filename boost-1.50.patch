@@ -187,7 +187,7 @@ diff -dur mongodb-src-r2.2.0.orig/src/mongo/tools/restore.cpp mongodb-src-r2.2.0
 --- mongodb-src-r2.2.0.orig/src/mongo/tools/restore.cpp	2012-08-28 07:28:11.000000000 +0200
 +++ mongodb-src-r2.2.0/src/mongo/tools/restore.cpp	2012-09-28 13:41:57.000000000 +0200
 @@ -174,7 +174,7 @@
-         log(2) << "drillDown: " << root.string() << endl;
+         LOG(2) << "drillDown: " << root.string() << endl;
  
          // skip hidden files and directories
 -        if (root.leaf()[0] == '.' && root.leaf() != ".")
@@ -207,7 +207,7 @@ diff -dur mongodb-src-r2.2.0.orig/src/mongo/tools/restore.cpp mongodb-src-r2.2.0
 +                if ( p.filename().string() == "system.indexes.bson" ) {
                      indexes = p;
                  } else {
-                     drillDown(p, use_db, use_coll);
+                     drillDown(p, use_db, use_coll, oplogReplayLimit);
 @@ -233,7 +233,7 @@
  
          log() << root.string() << endl;
