@@ -1,0 +1,65 @@
+--- mongodb-src-r2.2.4/src/mongo/db/namespace.h~	2013-04-01 04:41:49.000000000 +0200
++++ mongodb-src-r2.2.4/src/mongo/db/namespace.h	2021-08-22 18:30:50.941369906 +0200
+@@ -31,7 +31,7 @@
+         explicit Namespace(const char *ns) { *this = ns; }
+         Namespace& operator=(const char *ns);
+ 
+-        bool hasDollarSign() const { return strchr( buf , '$' ) > 0;  }
++        bool hasDollarSign() const { return strchr( buf , '$' ) != 0;  }
+         void kill() { buf[0] = 0x7f; }
+         bool operator==(const char *r) const { return strcmp(buf, r) == 0; }
+         bool operator==(const Namespace& r) const { return strcmp(buf, r.buf) == 0; }
+--- mongodb-src-r2.2.4/src/mongo/db/client.h~	2013-04-01 04:41:49.000000000 +0200
++++ mongodb-src-r2.2.4/src/mongo/db/client.h	2021-08-22 18:31:39.654710221 +0200
+@@ -262,6 +262,6 @@
+     inline Client::GodScope::~GodScope() { cc()._god = _prev; }
+ 
+ 
+-    inline bool haveClient() { return currentClient.get() > 0; }
++    inline bool haveClient() { return currentClient.get() != 0; }
+ 
+ };
+--- mongodb-src-r2.2.4/src/mongo/client/connpool.h~	2013-04-01 04:41:49.000000000 +0200
++++ mongodb-src-r2.2.4/src/mongo/client/connpool.h	2021-08-22 18:32:59.911405982 +0200
+@@ -259,7 +259,7 @@
+             return _conn;
+         }
+ 
+-        bool ok() const { return _conn > 0; }
++        bool ok() const { return _conn != 0; }
+ 
+         string getHost() const { return _host; }
+ 
+--- mongodb-src-r2.2.4/src/mongo/s/shard.h~	2013-04-01 04:41:49.000000000 +0200
++++ mongodb-src-r2.2.4/src/mongo/s/shard.h	2021-08-22 18:33:42.971429662 +0200
+@@ -274,7 +274,7 @@
+             _finishedInit = true;
+         }
+         
+-        bool ok() const { return _conn > 0; }
++        bool ok() const { return _conn != 0; }
+ 
+         /**
+            this just passes through excpet it checks for stale configs
+--- mongodb-src-r2.2.4/src/mongo/db/ops/update_internal.cpp~	2013-04-01 04:41:49.000000000 +0200
++++ mongodb-src-r2.2.4/src/mongo/db/ops/update_internal.cpp	2021-08-22 18:36:03.678206895 +0200
+@@ -1117,7 +1117,7 @@
+                     continue;
+                 }
+ 
+-                _hasDynamicArray = _hasDynamicArray || strstr( fieldName , ".$" ) > 0;
++                _hasDynamicArray = _hasDynamicArray || strstr( fieldName , ".$" ) != 0;
+ 
+                 Mod m;
+                 m.init( op , f , forReplication );
+--- mongodb-src-r2.2.4/src/mongo/s/d_state.cpp~	2013-04-01 04:41:49.000000000 +0200
++++ mongodb-src-r2.2.4/src/mongo/s/d_state.cpp	2021-08-22 18:37:07.564938002 +0200
+@@ -411,7 +411,7 @@
+         if ( ! shardingState.hasVersion( ns ) )
+             return false;
+ 
+-        return ShardedConnectionInfo::get(false) > 0;
++        return ShardedConnectionInfo::get(false) != 0;
+     }
+ 
+     class UnsetShardingCommand : public MongodShardCommand {
